@@ -52,11 +52,12 @@ namespace MapGenerator
                 for (var x = 0; x < _config.mapWidth; x++)
                 {
                     var currentHeight = noiseMap[x, y];
+                    
                     foreach (var region in _config.OrderedRegions)
                     {   
                         if (!(currentHeight <= region.height)) continue;
                         
-                        colorMap[y * _config.mapHeight + x] = region.color;
+                        colorMap[y * _config.mapWidth + x] = region.color;
                         break;
                     }
                 }
