@@ -451,6 +451,7 @@ MonoBehaviour:
   generationConfig: {fileID: 11400000, guid: 51a4078e7a6f04f4c912f90020980fa4, type: 2}
   renderer: {fileID: 274232317}
   generatorUi: {fileID: 1046336679}
+  camera: {fileID: 1702143024}
 --- !u!114 &751661846
 MonoBehaviour:
   m_ObjectHideFlags: 0
