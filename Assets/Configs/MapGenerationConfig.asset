@@ -13,19 +13,19 @@ MonoBehaviour:
   m_Name: MapGenerationConfig
   m_EditorClassIdentifier: 
   drawMode: 1
-  mapWidth: 100
-  mapHeight: 100
+  mapWidth: 10
+  mapHeight: 10
   levelOfDetail: 5
   noiseScale: 20
   octaves: 6
   persistence: 0.5
   lacunarity: 5
-  seed: 1
+  seed: 0
   offset: {x: 0, y: 0}
   autoUpdate: 0
   regions:
-  - {fileID: 11400000, guid: 9b9c9cc0ef7569e468c0da0f835b9d22, type: 2}
   - {fileID: 11400000, guid: 1136c1dd50de55a4aba0ae2c25f735d3, type: 2}
+  - {fileID: 11400000, guid: 9b9c9cc0ef7569e468c0da0f835b9d22, type: 2}
   - {fileID: 11400000, guid: 5b4e61f1532aafe4c9f3b0872f756c04, type: 2}
   - {fileID: 11400000, guid: dc8750912b423224b92d389bd5d56fa4, type: 2}
   - {fileID: 11400000, guid: 3f0b86cf21fe296449875084bad53520, type: 2}

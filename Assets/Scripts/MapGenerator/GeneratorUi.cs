@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +9,7 @@ namespace MapGenerator
     public class GeneratorUi : MonoBehaviour
     {
         [SerializeField] private Button generateButton;
+        [SerializeField] private Button generatePreviewButton;
         [SerializeField] private Button viewParametersButton;
         [SerializeField] private TMP_Dropdown drawMode;
         [SerializeField] private TMP_InputField mapWidth;
@@ -27,15 +26,17 @@ namespace MapGenerator
         [SerializeField] private GameObject parametersPanel;
 
         private GenerationConfig _config;
+        private MapPreviewGenerator _mapPreviewGenerator;
         private MapGenerator _mapGenerator;
         private bool _isAutoUpdate;
         private Dictionary<DrawMode, int> _drawModeIds;
 
         [Inject]
-        public void Initialize(MapGenerator mapGenerator, GenerationConfig config)
+        public void Initialize(MapPreviewGenerator mapPreviewGenerator, MapGenerator mapGenerator, GenerationConfig config)
         {
             _config = config;
             _mapGenerator = mapGenerator;
+            _mapPreviewGenerator = mapPreviewGenerator;
             _drawModeIds = new()
             {
                 { DrawMode.NoiseMap, 0 },
@@ -86,7 +87,8 @@ namespace MapGenerator
         private void AddSubscriptions()
         {
             viewParametersButton.onClick.AddListener(ToggleMenu);
-            generateButton.onClick.AddListener(() => _mapGenerator.GenerateMap(_config.drawMode));
+            generateButton.onClick.AddListener(() => _mapGenerator.GenerateMap());
+            generatePreviewButton.onClick.AddListener(() => _mapPreviewGenerator.GenerateMapPreview());
             drawMode.onValueChanged.AddListener(ChangeDrawMode);
             mapWidth.onValueChanged.AddListener(b => _config.mapWidth = int.Parse(b));
             mapHeight.onValueChanged.AddListener(b => _config.mapHeight = int.Parse(b));
@@ -127,31 +129,31 @@ namespace MapGenerator
         {
             if (_isAutoUpdate)
             {
-                drawMode.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                mapWidth.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                mapHeight.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                levelOfDetail.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                noiseScale.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                octaves.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                persistence.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                lacunarity.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                seed.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                offsetX.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-                offsetY.onValueChanged.AddListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
+                drawMode.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                mapWidth.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                mapHeight.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                levelOfDetail.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                noiseScale.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                octaves.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                persistence.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                lacunarity.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                seed.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                offsetX.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                offsetY.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
                 return;
             }
             
-            drawMode.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            mapWidth.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            mapHeight.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            levelOfDetail.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            noiseScale.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            octaves.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            persistence.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            lacunarity.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            seed.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            offsetX.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
-            offsetY.onValueChanged.RemoveListener(_=> _mapGenerator.GenerateMap(_config.drawMode));
+            drawMode.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            mapWidth.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            mapHeight.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            levelOfDetail.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            noiseScale.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            octaves.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            persistence.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            lacunarity.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            seed.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            offsetX.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            offsetY.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
         }
     }
 }

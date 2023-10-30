@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace MapGenerator
@@ -25,8 +24,8 @@ namespace MapGenerator
 
         public bool autoUpdate;
 
-        public TileTypeConfig[] regions;
-        
-        public IOrderedEnumerable<TileTypeConfig> OrderedRegions;
+        public RegionConfig[] regions;
+
+        public IOrderedEnumerable<RegionConfig> OrderedRegions;
     }
 }
