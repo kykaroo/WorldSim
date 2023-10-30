@@ -7,6 +7,7 @@ namespace MapGenerator
     public class GenerationConfig : ScriptableObject
     {
         public DrawMode drawMode;
+        public int tileSize;
 
         public int mapWidth;
         public int mapHeight;

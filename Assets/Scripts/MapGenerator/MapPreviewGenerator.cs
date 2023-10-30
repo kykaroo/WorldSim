@@ -18,8 +18,6 @@ namespace MapGenerator
             _display = display;
             _textureGenerator = textureGenerator;
             _config.OrderedRegions = _config.regions.OrderBy(b => b.height);
-            
-            GenerateMapPreview();
         }
 
         public void GenerateMapPreview()
@@ -29,10 +27,10 @@ namespace MapGenerator
             switch (_config.drawMode)
             {
                 case DrawMode.NoiseMap:
-                    _display.DrawTexture(_textureGenerator.TextureFromHeightMap(mapData.HeightMap));
+                    _display.DrawTexture(_textureGenerator.TextureFromHeightMap(mapData.HeightMap), _config);
                     break;
                 case DrawMode.ColorMap:
-                    _display.DrawTexture(_textureGenerator.TextureFromColourMap(mapData.ColorMap, _config.mapWidth, _config.mapHeight));
+                    _display.DrawTexture(_textureGenerator.TextureFromColourMap(mapData.ColorMap, _config.mapWidth, _config.mapHeight), _config);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

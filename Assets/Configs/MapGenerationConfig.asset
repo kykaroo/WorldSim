@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: MapGenerationConfig
   m_EditorClassIdentifier: 
   drawMode: 1
-  mapWidth: 10
-  mapHeight: 10
+  tileSize: 1
+  mapWidth: 100
+  mapHeight: 100
   levelOfDetail: 5
   noiseScale: 20
   octaves: 6

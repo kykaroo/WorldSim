@@ -6,13 +6,15 @@ public class CameraController : ITickable
     private readonly Camera _camera;
     
     private Vector3 _lastMousePosition;
-    private float _sensitivity = 10f;
-    private bool _drag;
+    private bool _isDragAction;
+    private Vector3 _origin;
+    private Vector3 _difference;
 
     [Inject]
     public CameraController(Camera camera)
     {
         _camera = camera;
+        _camera.transform.position = new(50, 50, -10);
     }
 
 
@@ -27,10 +29,10 @@ public class CameraController : ITickable
         switch (Input.mouseScrollDelta.y)
         {
             case > 0:
-                _camera.transform.position += Vector3.forward * 50;
+                _camera.orthographicSize -= 0.5f;
                 break;
             case < 0:
-                _camera.transform.position -= Vector3.forward * 50;
+                _camera.orthographicSize += 0.5f;
                 break;
         }
     }
@@ -39,13 +41,24 @@ public class CameraController : ITickable
     {
         if (Input.GetKey(KeyCode.Mouse0))
         {
-            var mouseDelta = _lastMousePosition - Input.mousePosition;
-
-            _camera.transform.position += new Vector3(mouseDelta.x, mouseDelta.y, 0);
-
-            _lastMousePosition = Input.mousePosition;
+            var mousePositionX = Input.mousePosition.x;
+            var mousePositionY = Input.mousePosition.y;
+            _difference = _camera.ScreenToWorldPoint(new(mousePositionX, mousePositionY, _camera.transform.position.z)) - _camera.transform.position;
+            
+            if (!_isDragAction)
+            {
+                _isDragAction = true;
+                _origin = _camera.ScreenToWorldPoint(new(mousePositionX, mousePositionY, _camera.transform.position.z));
+            }
+        }
+        else
+        {
+            _isDragAction = false;
         }
 
-        _lastMousePosition = Input.mousePosition;
+        if (_isDragAction)
+        {
+            _camera.transform.position = _origin - _difference;
+        }
     }
 }

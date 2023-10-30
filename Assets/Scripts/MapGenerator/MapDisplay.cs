@@ -13,10 +13,15 @@ namespace MapGenerator
             _textureRenderer = renderer;
         }
 
-        public void DrawTexture(Texture2D texture)
+        public void DrawTexture(Texture2D texture, GenerationConfig config)
         {
+            var width = config.mapWidth;
+            var height = config.mapHeight;
+            var tileSize = config.tileSize;
+            
             _textureRenderer.sharedMaterial.mainTexture = texture; //Применив textureRenderer.material нельзя будет тестировать в эдиторе
-            _textureRenderer.transform.localScale = new(1, 1, 1); //Подстраивает размер объекта под размер текстуры
+            _textureRenderer.transform.localScale = new(1 * width / 10f, 1, 1 * height / 10f); //Подстраивает размер объекта под размер текстуры
+            _textureRenderer.transform.position = new (width / 2f - tileSize / 2, height / 2f - tileSize / 2, 0.001f);
         }
     }
 }

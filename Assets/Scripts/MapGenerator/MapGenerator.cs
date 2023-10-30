@@ -1,17 +1,15 @@
-﻿using System;
-using Data;
-using Unity.Mathematics;
+﻿using Data;
 using UnityEngine;
 using Zenject;
-using Object = UnityEngine.Object;
+using TileData = Data.TileData;
 
 namespace MapGenerator
 {
     public class MapGenerator
     {
         private readonly GenerationConfig _config;
+        private readonly TileData _tilePrefab;
         private WorldData _worldData;
-        private TileData _tilePrefab;
 
         [Inject]
         public MapGenerator(GenerationConfig config, TileData tilePrefab)
@@ -61,22 +59,18 @@ namespace MapGenerator
         private TileData GenerateTile(int x, int y, GameObject tilesParent, RegionConfig region, WorldData worldData, float currentHeight)
         {
             var drawMode = _config.drawMode;
-            var tile = Object.Instantiate(_tilePrefab, new(x, y, 0), quaternion.identity, tilesParent.transform);
-            tile.name = $"Tile_{x}_{y}";
             
-            var tileData = tile.GetComponent<TileData>();
-            tileData.Initialize(x, y, region.tileType);
+            var tileData = _tilePrefab.Initialize(x, y, region.tileType, tilesParent.transform);
 
-            tileData.Renderer.material.color = drawMode switch
-            {
-                DrawMode.NoiseMap => Color.Lerp(Color.black, Color.white, currentHeight),
-                DrawMode.ColorMap => region.color,
-                _ => throw new ArgumentOutOfRangeException(nameof(drawMode), drawMode, null)
-            };
 
             worldData.AddTile(tileData);
             
             return tileData;
+        }
+        
+        public void ClearMapInfo()
+        {
+            _worldData.ClearAllTiles();
         }
     }
 }

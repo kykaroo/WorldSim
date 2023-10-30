@@ -30,6 +30,7 @@ namespace MapGenerator
         private MapGenerator _mapGenerator;
         private bool _isAutoUpdate;
         private Dictionary<DrawMode, int> _drawModeIds;
+        private bool _paramHasChanged;
 
         [Inject]
         public void Initialize(MapPreviewGenerator mapPreviewGenerator, MapGenerator mapGenerator, GenerationConfig config)
@@ -43,6 +44,7 @@ namespace MapGenerator
                 { DrawMode.ColorMap, 1 }
             };
 
+            _paramHasChanged = false;
             gameObject.SetActive(true);
 
             var list = new List<string>
@@ -63,6 +65,9 @@ namespace MapGenerator
             }
             
             AddSubscriptions();
+            
+            _mapPreviewGenerator.GenerateMapPreview();
+            _mapGenerator.GenerateMap();
         }
 
         private void InitializeValues()
@@ -87,8 +92,8 @@ namespace MapGenerator
         private void AddSubscriptions()
         {
             viewParametersButton.onClick.AddListener(ToggleMenu);
-            generateButton.onClick.AddListener(() => _mapGenerator.GenerateMap());
-            generatePreviewButton.onClick.AddListener(() => _mapPreviewGenerator.GenerateMapPreview());
+            generateButton.onClick.AddListener(GenerateMap);
+            generatePreviewButton.onClick.AddListener(GenerateMapPreview);
             drawMode.onValueChanged.AddListener(ChangeDrawMode);
             mapWidth.onValueChanged.AddListener(b => _config.mapWidth = int.Parse(b));
             mapHeight.onValueChanged.AddListener(b => _config.mapHeight = int.Parse(b));
@@ -103,14 +108,28 @@ namespace MapGenerator
             autoUpdate.onValueChanged.AddListener(ToggleAutoUpdate);
         }
 
+        private void GenerateMapPreview()
+        {
+            if (!_paramHasChanged) return;
+
+            _mapPreviewGenerator.GenerateMapPreview();
+        }
+
+        private void GenerateMap()
+        {
+            if (!_paramHasChanged) return;
+            
+            _mapGenerator.GenerateMap();
+        }
+
         private void ToggleMenu()
         {
             parametersPanel.SetActive(!parametersPanel.activeSelf);
         }
 
-        private void ToggleAutoUpdate(bool arg0)
+        private void ToggleAutoUpdate(bool arg)
         {
-            _isAutoUpdate = arg0;
+            _isAutoUpdate = arg;
             
             AutoUpdateSubscriptions();
         }
@@ -127,33 +146,41 @@ namespace MapGenerator
 
         private void AutoUpdateSubscriptions()
         {
-            if (_isAutoUpdate)
+            drawMode.onValueChanged.AddListener(OnParamsChanged);
+            mapWidth.onValueChanged.AddListener(OnParamsChanged);
+            mapHeight.onValueChanged.AddListener(OnParamsChanged);
+            levelOfDetail.onValueChanged.AddListener(OnParamsChanged);
+            noiseScale.onValueChanged.AddListener(OnParamsChanged);
+            octaves.onValueChanged.AddListener(OnParamsChanged);
+            persistence.onValueChanged.AddListener(OnParamsChanged);
+            lacunarity.onValueChanged.AddListener(OnParamsChanged);
+            seed.onValueChanged.AddListener(OnParamsChanged);
+            offsetX.onValueChanged.AddListener(OnParamsChanged);
+            offsetY.onValueChanged.AddListener(OnParamsChanged);
+        }
+
+        private void OnParamsChanged(int fgh)
+        {
+            if (!_isAutoUpdate)
             {
-                drawMode.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                mapWidth.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                mapHeight.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                levelOfDetail.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                noiseScale.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                octaves.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                persistence.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                lacunarity.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                seed.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                offsetX.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-                offsetY.onValueChanged.AddListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+                _paramHasChanged = true;
                 return;
             }
             
-            drawMode.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            mapWidth.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            mapHeight.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            levelOfDetail.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            noiseScale.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            octaves.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            persistence.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            lacunarity.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            seed.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            offsetX.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
-            offsetY.onValueChanged.RemoveListener(_=> _mapPreviewGenerator.GenerateMapPreview());
+            _mapGenerator.ClearMapInfo();
+            _mapPreviewGenerator.GenerateMapPreview();
+        }
+        
+        private void OnParamsChanged(string fgh)
+        {
+            if (!_isAutoUpdate)
+            {
+                _paramHasChanged = true;
+                return;
+            }
+            
+            _mapGenerator.ClearMapInfo();
+            _mapPreviewGenerator.GenerateMapPreview();
         }
     }
 }

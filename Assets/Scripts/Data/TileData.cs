@@ -1,17 +1,26 @@
 ﻿using UnityEngine;
+using UnityEngine.Tilemaps;
+using Tile = MapGenerator.Tile;
 
 namespace Data
 {
-    public class TileData : MonoBehaviour
+    [CreateAssetMenu(menuName = "MapGeneration/TileConfig", fileName = "Tile Config")]
+    public class TileData : TileBase
     {
+        [field: SerializeField] public GameObject TilePrefab { get; private set; }
+
         public int X { get; private set; }
         public int Y { get; private set; }
         public TileType TileType { get; private set; }
         public bool IsPassable { get; private set; }
-        [field: SerializeField] public SpriteRenderer Renderer { get; private set; }
 
-        public void Initialize(int x, int y, TileType tileType)
+        public TileData Initialize(int x, int y, TileType tileType, Transform parent)
         {
+            var gameObject = Instantiate(TilePrefab, new(x,y,0), Quaternion.identity, parent);
+            gameObject.GetComponent<Tile>().Initialize(x, y);
+
+            gameObject.name = $"Tile_{x}_{y}";
+            
             X = x;
             Y = y;
             TileType = tileType;
@@ -21,6 +30,8 @@ namespace Data
                 TileType.Summit => false,
                 _ => IsPassable = true
             };
+
+            return this;
         }
     }
 }
