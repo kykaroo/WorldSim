@@ -61,6 +61,7 @@ namespace MapGenerator
                 case TileType.None:
                     break;
                 default:
+                    if(Config.drawMode == DrawMode.NoiseMap) return;
                     Type = Config.tileToPlace;
                     break;
             }
