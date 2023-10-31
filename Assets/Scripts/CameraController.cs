@@ -4,6 +4,7 @@ using Zenject;
 public class CameraController : ITickable
 {
     private readonly Camera _camera;
+    private readonly CameraConfig _cameraConfig;
     
     private Vector3 _lastMousePosition;
     private bool _isDragAction;
@@ -11,10 +12,10 @@ public class CameraController : ITickable
     private Vector3 _difference;
 
     [Inject]
-    public CameraController(Camera camera)
+    public CameraController(CameraConfig cameraConfig)
     {
-        _camera = camera;
-        _camera.transform.position = new(50, 50, -10);
+        _cameraConfig = cameraConfig;
+        _camera = Object.Instantiate(_cameraConfig.camera, _cameraConfig.startPosition, Quaternion.identity);
     }
 
 
@@ -29,10 +30,12 @@ public class CameraController : ITickable
         switch (Input.mouseScrollDelta.y)
         {
             case > 0:
-                _camera.orthographicSize -= 0.5f;
+                if (_camera.orthographicSize <= _cameraConfig.zoomMin) return;
+                _camera.orthographicSize -= _cameraConfig.zoomSensitivity;
                 break;
             case < 0:
-                _camera.orthographicSize += 0.5f;
+                if (_camera.orthographicSize >= _cameraConfig.zoomMax) return;
+                _camera.orthographicSize += _cameraConfig.zoomSensitivity;
                 break;
         }
     }
