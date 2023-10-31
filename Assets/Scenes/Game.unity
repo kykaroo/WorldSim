@@ -369,7 +369,7 @@ MonoBehaviour:
   renderer: {fileID: 1782502144}
   generatorUi: {fileID: 1046336679}
   Camera: {fileID: 1702143024}
-  tilePrefab: {fileID: 11400000, guid: 48362b47b3918a048a44e8ff8f67b59a, type: 2}
+  tilePrefab: {fileID: -7836320636925867615, guid: 57cb54905153bc14aa0f14693385edca, type: 3}
 --- !u!114 &751661846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -547,7 +547,7 @@ Camera:
   far clip plane: 10000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -669,6 +669,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 693659098}
     m_Modifications:
+    - target: {fileID: 141238847333812686, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 141238847333812686, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290396034420877465, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 43.2877
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290396034420877465, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -11.6439
+      objectReference: {fileID: 0}
+    - target: {fileID: 3339982937801315258, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6707593318658125693, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7743086846803122973, guid: 6dd2c74b67649324abc843443efa5704, type: 3}
       propertyPath: m_RootOrder
       value: -1

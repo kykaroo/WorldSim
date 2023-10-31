@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using Data;
+using UnityEngine;
 using Zenject;
 
 namespace MapGenerator
@@ -10,9 +12,11 @@ namespace MapGenerator
 
         public Texture2D TextureFromColourMap(Color[] colorMap, int width, int height)
         {
-            var texture = new Texture2D(width, height); //Инициализания графической карты
-            texture.filterMode = FilterMode.Point; // Убирает блюр карты
-            texture.wrapMode = TextureWrapMode.Clamp;
+            var texture = new Texture2D(width, height)
+            {
+                filterMode = FilterMode.Point, // Убирает блюр карты
+                wrapMode = TextureWrapMode.Clamp
+            }; //Инициализания графической карты
             //Применяет все цвета пикселей на текстуре
             texture.SetPixels(colorMap);
             texture.Apply();
@@ -30,6 +34,14 @@ namespace MapGenerator
                 colorMap[y * width + x] = Color.Lerp(Color.black, Color.white, heightMap[x, y]);
 
             return TextureFromColourMap(colorMap, width, height);
+        }
+
+        public Texture2D ChangePixel(Texture2D texture, int x, int y, TileType tileType, GenerationConfig config)
+        {
+            texture.SetPixel(x,y, config.regions.First(b => b.tileType == tileType).color);
+            texture.Apply();
+
+            return texture;
         }
     }
 }

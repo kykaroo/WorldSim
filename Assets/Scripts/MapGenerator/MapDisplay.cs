@@ -21,7 +21,7 @@ namespace MapGenerator
             
             _textureRenderer.sharedMaterial.mainTexture = texture; //Применив textureRenderer.material нельзя будет тестировать в эдиторе
             _textureRenderer.transform.localScale = new(1 * width / 10f, 1, 1 * height / 10f); //Подстраивает размер объекта под размер текстуры
-            _textureRenderer.transform.position = new (width / 2f - tileSize / 2, height / 2f - tileSize / 2, 0.001f);
+            _textureRenderer.transform.position = new (width / 2f - tileSize / 2f, height / 2f - tileSize / 2f, 0.001f);
         }
     }
 }

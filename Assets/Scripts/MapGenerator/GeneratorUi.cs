@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,36 +26,49 @@ namespace MapGenerator
         [SerializeField] private TMP_InputField offsetY;
         [SerializeField] private Toggle autoUpdate;
         [SerializeField] private GameObject parametersPanel;
+        [SerializeField] private TMP_Dropdown tileType;
 
         private GenerationConfig _config;
-        private MapPreviewGenerator _mapPreviewGenerator;
-        private MapGenerator _mapGenerator;
+        private MapInfoController _mapInfoController;
         private bool _isAutoUpdate;
         private Dictionary<DrawMode, int> _drawModeIds;
         private bool _paramHasChanged;
+        private bool _mapInfoIsClear;
 
         [Inject]
-        public void Initialize(MapPreviewGenerator mapPreviewGenerator, MapGenerator mapGenerator, GenerationConfig config)
+        public void Initialize(MapInfoController mapInfoController, GenerationConfig config)
         {
             _config = config;
-            _mapGenerator = mapGenerator;
-            _mapPreviewGenerator = mapPreviewGenerator;
+            _mapInfoController = mapInfoController;
+            
             _drawModeIds = new()
             {
                 { DrawMode.NoiseMap, 0 },
                 { DrawMode.ColorMap, 1 }
             };
 
-            _paramHasChanged = false;
+            _paramHasChanged = true;
             gameObject.SetActive(true);
 
-            var list = new List<string>
+            var drawModeList = new List<string>
             {
                 "Noise map",
                 "Color map"
             };
+            var tileTypeList = new List<string>
+            {
+                "None",
+                "Ocean",
+                "Sand",
+                "Grass",
+                "Rocks",
+                "Mountain",
+                "Summit"
+            };
             drawMode.ClearOptions();
-            drawMode.AddOptions(list);
+            tileType.ClearOptions();
+            drawMode.AddOptions(drawModeList);
+            tileType.AddOptions(tileTypeList);
 
             parametersPanel.SetActive(false);
 
@@ -66,8 +81,8 @@ namespace MapGenerator
             
             AddSubscriptions();
             
-            _mapPreviewGenerator.GenerateMapPreview();
-            _mapGenerator.GenerateMap();
+            GenerateMapPreview();
+            GenerateMap();
         }
 
         private void InitializeValues()
@@ -95,6 +110,7 @@ namespace MapGenerator
             generateButton.onClick.AddListener(GenerateMap);
             generatePreviewButton.onClick.AddListener(GenerateMapPreview);
             drawMode.onValueChanged.AddListener(ChangeDrawMode);
+            tileType.onValueChanged.AddListener(ChangeTileType);
             mapWidth.onValueChanged.AddListener(b => _config.mapWidth = int.Parse(b));
             mapHeight.onValueChanged.AddListener(b => _config.mapHeight = int.Parse(b));
             levelOfDetail.onValueChanged.AddListener(b => _config.levelOfDetail = int.Parse(b));
@@ -108,18 +124,34 @@ namespace MapGenerator
             autoUpdate.onValueChanged.AddListener(ToggleAutoUpdate);
         }
 
+        private void ChangeTileType(int arg0)
+        {
+            _config.tileToPlace = arg0 switch
+            {
+                0 => TileType.None,
+                1 => TileType.Ocean,
+                2 => TileType.Sand,
+                3 => TileType.Grass,
+                4 => TileType.Rocks,
+                5 => TileType.Mountain,
+                6 => TileType.Summit,
+                _ => throw new ArgumentException()
+            };
+        }
+
         private void GenerateMapPreview()
         {
             if (!_paramHasChanged) return;
 
-            _mapPreviewGenerator.GenerateMapPreview();
+            _mapInfoController.CreateMapGraphic();
         }
 
         private void GenerateMap()
         {
             if (!_paramHasChanged) return;
-            
-            _mapGenerator.GenerateMap();
+
+            _mapInfoIsClear = false;
+            _mapInfoController.CreateMapInfo();
         }
 
         private void ToggleMenu()
@@ -140,7 +172,7 @@ namespace MapGenerator
             {
                 0 => DrawMode.NoiseMap,
                 1 => DrawMode.ColorMap,
-                _ => _config.drawMode
+                _ => throw new ArgumentException()
             };
         }
 
@@ -166,9 +198,14 @@ namespace MapGenerator
                 _paramHasChanged = true;
                 return;
             }
+
+            if (!_mapInfoIsClear)
+            {
+                _mapInfoIsClear = true;
+                _mapInfoController.ClearMap();
+            }
             
-            _mapGenerator.ClearMapInfo();
-            _mapPreviewGenerator.GenerateMapPreview();
+            _mapInfoController.CreateMapGraphic();
         }
         
         private void OnParamsChanged(string fgh)
@@ -179,8 +216,13 @@ namespace MapGenerator
                 return;
             }
             
-            _mapGenerator.ClearMapInfo();
-            _mapPreviewGenerator.GenerateMapPreview();
+            if (!_mapInfoIsClear)
+            {
+                _mapInfoIsClear = true;
+                _mapInfoController.ClearMap();
+            }
+            
+            _mapInfoController.CreateMapGraphic();
         }
     }
 }

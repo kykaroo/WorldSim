@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Data;
 using UnityEngine;
 
 namespace MapGenerator
@@ -7,6 +8,7 @@ namespace MapGenerator
     public class GenerationConfig : ScriptableObject
     {
         public DrawMode drawMode;
+        public TileType tileToPlace;
         public int tileSize;
 
         public int mapWidth;

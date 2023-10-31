@@ -1,21 +1,21 @@
 ﻿using Data;
 using UnityEngine;
 using Zenject;
-using TileData = Data.TileData;
 
 namespace MapGenerator
 {
-    public class MapGenerator
+    public class MapInfoGenerator
     {
         private readonly GenerationConfig _config;
-        private readonly TileData _tilePrefab;
-        private WorldData _worldData;
+        private readonly Tile _tilePrefab;
+        private readonly WorldData _worldData;
 
         [Inject]
-        public MapGenerator(GenerationConfig config, TileData tilePrefab)
+        public MapInfoGenerator(GenerationConfig config, Tile tilePrefab, WorldData worldData)
         {
             _config = config;
             _tilePrefab = tilePrefab;
+            _worldData = worldData;
         }
 
         public void GenerateMap()
@@ -25,10 +25,10 @@ namespace MapGenerator
             
             var noiseMap = Noise.GenerateNoiseMap(configMapWidth, configMapHeight, _config.seed, _config.noiseScale,
                 _config.octaves, _config.persistence, _config.lacunarity, _config.offset);
+
+            _worldData.FirstGeneration = true;
+            _worldData.CreateNewData(configMapWidth, configMapHeight, _tilePrefab);
             
-            var tilesData = new TileData[configMapWidth, configMapHeight];
-            _worldData?.ClearAllTiles();
-            _worldData = new(configMapWidth, configMapHeight);
             var tilesParent = new GameObject
             {
                 name = "WorldTiles",
@@ -37,8 +37,7 @@ namespace MapGenerator
                     position = Vector3.zero
                 }
             };
-
-            // Присваивает точке на карте цвет согласно регионам по высоте
+            
             for (var y = 0; y < configMapHeight; y++)
             {
                 for (var x = 0; x < configMapWidth; x++)
@@ -49,28 +48,18 @@ namespace MapGenerator
                     {   
                         if (!(currentHeight <= region.height)) continue;
 
-                        tilesData[x, y] = GenerateTile(x, y, tilesParent, region, _worldData, currentHeight);
+                        GenerateTile(x, y, tilesParent.transform, region, _worldData);
                         break;
                     }
                 }
             }
+            
+            _worldData.FirstGeneration = false;
         }
 
-        private TileData GenerateTile(int x, int y, GameObject tilesParent, RegionConfig region, WorldData worldData, float currentHeight)
+        private void GenerateTile(int x, int y, Transform tilesParent, RegionConfig region, WorldData worldData)
         {
-            var drawMode = _config.drawMode;
-            
-            var tileData = _tilePrefab.Initialize(x, y, region.tileType, tilesParent.transform);
-
-
-            worldData.AddTile(tileData);
-            
-            return tileData;
-        }
-        
-        public void ClearMapInfo()
-        {
-            _worldData.ClearAllTiles();
+            worldData.CreateTile(x, y, region.tileType, tilesParent);
         }
     }
 }

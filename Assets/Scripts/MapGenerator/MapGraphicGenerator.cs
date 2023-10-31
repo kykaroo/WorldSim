@@ -5,14 +5,15 @@ using Zenject;
 
 namespace MapGenerator
 {
-    public class MapPreviewGenerator
+    public class MapGraphicGenerator
     {
         private readonly GenerationConfig _config;
         private readonly MapDisplay _display;
         private readonly TextureGenerator _textureGenerator;
+        private Texture2D _texture;
 
         [Inject]
-        public MapPreviewGenerator(GenerationConfig config, MapDisplay display, TextureGenerator textureGenerator)
+        public MapGraphicGenerator(GenerationConfig config, MapDisplay display, TextureGenerator textureGenerator)
         {
             _config = config;
             _display = display;
@@ -20,18 +21,20 @@ namespace MapGenerator
             _config.OrderedRegions = _config.regions.OrderBy(b => b.height);
         }
 
-        public void GenerateMapPreview()
+        public Texture2D GenerateMap()
         {
             var mapData = GenerateMapData();
 
             switch (_config.drawMode)
             {
                 case DrawMode.NoiseMap:
-                    _display.DrawTexture(_textureGenerator.TextureFromHeightMap(mapData.HeightMap), _config);
-                    break;
+                    _texture = _textureGenerator.TextureFromHeightMap(mapData.HeightMap);
+                    _display.DrawTexture(_texture, _config);
+                    return _texture;
                 case DrawMode.ColorMap:
-                    _display.DrawTexture(_textureGenerator.TextureFromColourMap(mapData.ColorMap, _config.mapWidth, _config.mapHeight), _config);
-                    break;
+                    _texture = _textureGenerator.TextureFromColourMap(mapData.ColorMap, _config.mapWidth, _config.mapHeight);
+                    _display.DrawTexture(_texture, _config);
+                    return _texture;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
