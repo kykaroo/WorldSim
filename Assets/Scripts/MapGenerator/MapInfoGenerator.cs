@@ -8,14 +8,14 @@ namespace MapGenerator
     {
         private readonly GenerationConfig _config;
         private readonly Tile _tilePrefab;
-        private readonly WorldData _worldData;
+        private readonly WorldController _worldController;
 
         [Inject]
-        public MapInfoGenerator(GenerationConfig config, Tile tilePrefab, WorldData worldData)
+        public MapInfoGenerator(GenerationConfig config, Tile tilePrefab, WorldController worldController)
         {
             _config = config;
             _tilePrefab = tilePrefab;
-            _worldData = worldData;
+            _worldController = worldController;
         }
 
         public void GenerateMap()
@@ -26,8 +26,8 @@ namespace MapGenerator
             var noiseMap = Noise.GenerateNoiseMap(configMapWidth, configMapHeight, _config.seed, _config.noiseScale,
                 _config.octaves, _config.persistence, _config.lacunarity, _config.offset);
 
-            _worldData.FirstGeneration = true;
-            _worldData.CreateNewData(configMapWidth, configMapHeight, _tilePrefab);
+            _worldController.FirstGeneration = true;
+            _worldController.CreateNewData();
             
             var tilesParent = new GameObject
             {
@@ -48,18 +48,18 @@ namespace MapGenerator
                     {   
                         if (!(currentHeight <= region.height)) continue;
 
-                        GenerateTile(x, y, tilesParent.transform, region, _worldData);
+                        GenerateTile(x, y, tilesParent.transform, region);
                         break;
                     }
                 }
             }
             
-            _worldData.FirstGeneration = false;
+            _worldController.FirstGeneration = false;
         }
 
-        private void GenerateTile(int x, int y, Transform tilesParent, RegionConfig region, WorldData worldData)
+        private void GenerateTile(int x, int y, Transform tilesParent, RegionConfig region)
         {
-            worldData.CreateTile(x, y, region.tileType, tilesParent);
+            _worldController.CreateTile(x, y, region.tileType, tilesParent);
         }
     }
 }

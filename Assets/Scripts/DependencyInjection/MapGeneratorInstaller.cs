@@ -12,6 +12,8 @@ namespace DependencyInjection
         [SerializeField] private GeneratorUi generatorUi;
         [SerializeField] private Tile tilePrefab;
         [SerializeField] private CameraConfig cameraConfig;
+        [SerializeField] private GameObject highLight;
+        [SerializeField] private Camera camera;
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<MapGraphicGenerator>().AsSingle().NonLazy();
@@ -21,7 +23,9 @@ namespace DependencyInjection
             Container.BindInterfacesAndSelfTo<MapInfoController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<WorldData>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MapDisplay>().AsSingle().WithArguments(renderer).NonLazy();
-            Container.BindInterfacesAndSelfTo<CameraController>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<CameraController>().AsSingle().WithArguments(camera).NonLazy();
+            Container.BindInterfacesAndSelfTo<WorldController>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<MouseController>().AsSingle().WithArguments(camera, highLight).NonLazy();
             
             Container.BindInterfacesAndSelfTo<GenerationConfig>().FromNewScriptableObject(generationConfig).AsSingle();
             Container.BindInterfacesAndSelfTo<GeneratorUi>().FromInstance(generatorUi).AsSingle();

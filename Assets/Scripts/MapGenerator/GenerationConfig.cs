@@ -7,6 +7,7 @@ namespace MapGenerator
     [CreateAssetMenu(menuName = "MapGeneration/MapGenerationConfig", fileName = "Map Generation")]
     public class GenerationConfig : ScriptableObject
     {
+        public Tile tilePrefab;
         public DrawMode drawMode;
         public TileType tileToPlace;
         public int tileSize;

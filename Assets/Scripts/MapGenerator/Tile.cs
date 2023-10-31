@@ -6,8 +6,6 @@ namespace MapGenerator
 {
     public class Tile : MonoBehaviour
     {
-        [SerializeField] private GameObject highLight;
-
         public int X { get; private set; }
         public int Y { get; private set; }
         private TileType _type;
@@ -40,31 +38,6 @@ namespace MapGenerator
                 TileType.Summit => false,
                 _ => IsPassable = true
             };
-        }
-        
-        private void OnMouseEnter()
-        {
-            highLight.SetActive(true);
-        }
-        
-        private void OnMouseExit()
-        {
-            highLight.SetActive(false);
-        }
-
-        private void OnMouseDown()
-        {
-            print($"{_type} Tile({X},{Y})");
-
-            switch (Config.tileToPlace)
-            {
-                case TileType.None:
-                    break;
-                default:
-                    if(Config.drawMode == DrawMode.NoiseMap) return;
-                    Type = Config.tileToPlace;
-                    break;
-            }
         }
     }
 }

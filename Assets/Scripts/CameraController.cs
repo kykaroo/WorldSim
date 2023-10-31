@@ -12,10 +12,10 @@ public class CameraController : ITickable
     private Vector3 _difference;
 
     [Inject]
-    public CameraController(CameraConfig cameraConfig)
+    public CameraController(CameraConfig cameraConfig, Camera camera)
     {
         _cameraConfig = cameraConfig;
-        _camera = Object.Instantiate(_cameraConfig.camera, _cameraConfig.startPosition, Quaternion.identity);
+        _camera = camera;
     }
 
 
@@ -42,7 +42,7 @@ public class CameraController : ITickable
 
     private void MoveCamera()
     {
-        if (Input.GetKey(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.Mouse2))
         {
             var mousePositionX = Input.mousePosition.x;
             var mousePositionY = Input.mousePosition.y;

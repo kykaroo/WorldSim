@@ -1,12 +1,11 @@
-﻿using Data;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 namespace MapGenerator
 {
     public class MapInfoController
     {
-        private readonly WorldData _worldData;
+        private readonly WorldController _worldController;
         private readonly MapGraphicGenerator _mapGraphicGenerator;
         private readonly MapInfoGenerator _mapInfoGenerator;
         private readonly MapDisplay _mapDisplay;
@@ -15,18 +14,18 @@ namespace MapGenerator
         private Texture2D _texture;
 
         [Inject]
-        public MapInfoController(WorldData worldData, MapGraphicGenerator mapGraphicGenerator, 
+        public MapInfoController(WorldController worldController, MapGraphicGenerator mapGraphicGenerator, 
             MapInfoGenerator mapInfoGenerator, MapDisplay mapDisplay, TextureGenerator textureGenerator,
             GenerationConfig config)
         {
-            _worldData = worldData;
+            _worldController = worldController;
             _mapGraphicGenerator = mapGraphicGenerator;
             _mapInfoGenerator = mapInfoGenerator;
             _mapDisplay = mapDisplay;
             _textureGenerator = textureGenerator;
             _config = config;
 
-            _worldData.OnTileChanged += ChangePixel;
+            _worldController.OnTileChanged += ChangePixel;
         }
 
         public void CreateMapGraphic()
@@ -41,7 +40,7 @@ namespace MapGenerator
         
         public void ClearMap()
         {
-            _worldData.ClearAllTiles();
+            _worldController.ClearAllTiles();
         }
 
         private void ChangePixel(Tile tile)
