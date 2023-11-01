@@ -60,6 +60,8 @@ public class WorldController
             tile.OnTileTypeChanged -= TileChanged;
             Object.Destroy(tile.GameObject());
         }
+
+        _worldData.Tiles = null;
     }
 
     public void CreateTile(int x, int y, TileType tileType, Transform parent)
@@ -85,6 +87,7 @@ public class WorldController
 
     public Tile GetTile(int x, int y)
     {
+        if (_worldData.Tiles == null) return null;
         if (x < 0 || x > _config.mapWidth) return null;
         if (y < 0 || y > _config.mapHeight) return null;
 
