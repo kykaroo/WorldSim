@@ -1,5 +1,6 @@
-﻿using MapGenerator;
+﻿using UnityEngine.Tilemaps;
 using Zenject;
+using Tile = MapGenerator.Tile;
 
 namespace Data
 {
@@ -9,9 +10,13 @@ namespace Data
         public Tile[,] Tiles;
         public int Width;
         public int Height;
+        public readonly Tilemap Tilemap;
 
         [Inject]
-        public WorldData() { }
+        public WorldData(Tilemap tilemap)
+        {
+            Tilemap = tilemap;
+        }
 
         public void Initialize(int width, int height, Tile tilePrefab)
         {

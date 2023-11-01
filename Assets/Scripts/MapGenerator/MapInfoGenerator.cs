@@ -1,20 +1,16 @@
-﻿using Data;
-using UnityEngine;
-using Zenject;
+﻿using Zenject;
 
 namespace MapGenerator
 {
     public class MapInfoGenerator
     {
         private readonly GenerationConfig _config;
-        private readonly Tile _tilePrefab;
         private readonly WorldController _worldController;
 
         [Inject]
-        public MapInfoGenerator(GenerationConfig config, Tile tilePrefab, WorldController worldController)
+        public MapInfoGenerator(GenerationConfig config, WorldController worldController)
         {
             _config = config;
-            _tilePrefab = tilePrefab;
             _worldController = worldController;
         }
 
@@ -28,16 +24,7 @@ namespace MapGenerator
 
             _worldController.FirstGeneration = true;
             _worldController.CreateNewData();
-            
-            var tilesParent = new GameObject
-            {
-                name = "WorldTiles",
-                transform =
-                {
-                    position = Vector3.zero
-                }
-            };
-            
+
             for (var y = 0; y < configMapHeight; y++)
             {
                 for (var x = 0; x < configMapWidth; x++)
@@ -48,7 +35,7 @@ namespace MapGenerator
                     {   
                         if (!(currentHeight <= region.height)) continue;
 
-                        GenerateTile(x, y, tilesParent.transform, region);
+                        GenerateTile(x, y, region);
                         break;
                     }
                 }
@@ -57,9 +44,9 @@ namespace MapGenerator
             _worldController.FirstGeneration = false;
         }
 
-        private void GenerateTile(int x, int y, Transform tilesParent, RegionConfig region)
+        private void GenerateTile(int x, int y, RegionConfig region)
         {
-            _worldController.CreateTile(x, y, region.tileType, tilesParent);
+            _worldController.CreateTile(x, y, region);
         }
     }
 }

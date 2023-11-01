@@ -17,4 +17,4 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Water
   height: 0.2
-  color: {r: 0.018116951, g: 0, b: 1, a: 0}
+  color: {r: 0.018116951, g: 0, b: 1, a: 1}

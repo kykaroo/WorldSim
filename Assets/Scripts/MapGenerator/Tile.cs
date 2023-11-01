@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MapGenerator
 {
-    public class Tile : MonoBehaviour
+    public class Tile : UnityEngine.Tilemaps.Tile
     {
         public int X { get; private set; }
         public int Y { get; private set; }

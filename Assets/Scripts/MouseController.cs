@@ -33,7 +33,7 @@ public class MouseController : ITickable
         }
         else
         {
-            _highLight.transform.position = tileUnderMouse.transform.position;
+            _highLight.transform.position = new(tileUnderMouse.X, tileUnderMouse.Y, -0.0001f);
             _highLight.SetActive(true);
         }
 
@@ -70,6 +70,7 @@ public class MouseController : ITickable
                         switch (_config.tileToPlace)
                         {
                             case TileType.None:
+                                Debug.Log($"{t.X}, {t.Y}");
                                 break;
                             default:
                                 if(_config.drawMode == DrawMode.NoiseMap) return;

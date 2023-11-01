@@ -17,4 +17,4 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Mountains
   height: 0.8
-  color: {r: 0.6792453, g: 0.5927377, b: 0.5350659, a: 0}
+  color: {r: 0.6792453, g: 0.5927377, b: 0.5350659, a: 1}

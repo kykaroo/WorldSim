@@ -25,7 +25,7 @@ namespace MapGenerator
             _textureGenerator = textureGenerator;
             _config = config;
 
-            _worldController.OnTileChanged += ChangePixel;
+            // _worldController.OnTileChanged += ChangePixel;
         }
 
         public void CreateMapGraphic()

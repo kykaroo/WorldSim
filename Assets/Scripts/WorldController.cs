@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Linq;
 using Data;
 using MapGenerator;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using Zenject;
-using Object = UnityEngine.Object;
+using Tile = MapGenerator.Tile;
 
 public class WorldController
 {
     private readonly WorldData _worldData;
     private readonly GenerationConfig _config;
-    
+
     public bool FirstGeneration;
     
     public event Action<Tile> OnTileChanged;
@@ -48,7 +49,7 @@ public class WorldController
 
     private void TileChanged(Tile tile)
     {
-        OnTileChanged?.Invoke(tile);
+        _worldData.Tilemap.SetColor(new(tile.X, tile.Y, 0), _config.regions.First(b => b.tileType == tile.Type).color);
     }
 
     public void ClearAllTiles()
@@ -58,39 +59,36 @@ public class WorldController
         foreach (var tile in _worldData.Tiles)
         {
             tile.OnTileTypeChanged -= TileChanged;
-            Object.Destroy(tile.GameObject());
         }
 
+        _worldData.Tilemap.ClearAllTiles(); 
         _worldData.Tiles = null;
     }
 
-    public void CreateTile(int x, int y, TileType tileType, Transform parent)
+    public void CreateTile(int x, int y, RegionConfig region)
     {
-        var gameObject = Object.Instantiate(_config.tilePrefab, new(x,y,0), Quaternion.identity, parent);
-        gameObject.name = $"Tile_{x}_{y}";
-            
-        var tile = gameObject.GetComponent<Tile>();
-        tile.Initialize(x, y, tileType, _config);
-        _worldData.Tiles[x, y] = tile;
-
+        var tile = ScriptableObject.CreateInstance<Tile>();
+        var tilePos = new Vector3Int(x,y,0);
+        tile.Initialize(x, y, region.tileType, _config);
+        tile.sprite = region.tileSprite;
         tile.OnTileTypeChanged += TileChanged;
             
+        _worldData.Tilemap.SetTile(tilePos, tile);
+        _worldData.Tilemap.SetTileFlags(tilePos, TileFlags.None);
+        _worldData.Tiles[x, y] = tile;
+        _worldData.Tilemap.SetColor(tilePos, region.color);
+
         if (FirstGeneration) return;
             
         OnTileChanged?.Invoke(tile);
     }
 
-    public void ChangeTileType(int x, int y, TileType tileType)
-    {
-            
-    }
-
     public Tile GetTile(int x, int y)
     {
         if (_worldData.Tiles == null) return null;
-        if (x < 0 || x > _config.mapWidth) return null;
-        if (y < 0 || y > _config.mapHeight) return null;
+        if (x < 0 || x >= _config.mapWidth) return null;
+        if (y < 0 || y >= _config.mapHeight) return null;
 
-        return _worldData.Tiles[x, y];
+        return (Tile)_worldData.Tilemap.GetTile(new(x, y, 0));
     }
 }

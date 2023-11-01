@@ -17,4 +17,4 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Sand
   height: 0.25
-  color: {r: 1, g: 0.83413935, b: 0, a: 0}
+  color: {r: 1, g: 0.83413935, b: 0, a: 1}

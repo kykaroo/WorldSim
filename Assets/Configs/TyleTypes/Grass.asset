@@ -17,4 +17,4 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Grass
   height: 0.5
-  color: {r: 0.1827594, g: 1, b: 0, a: 0}
+  color: {r: 0.1827594, g: 1, b: 0, a: 1}

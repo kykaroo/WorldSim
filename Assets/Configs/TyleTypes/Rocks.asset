@@ -17,4 +17,4 @@ MonoBehaviour:
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Rocks
   height: 0.7
-  color: {r: 0.18867922, g: 0.14176965, b: 0.10946955, a: 0}
+  color: {r: 0.18867922, g: 0.14176965, b: 0.10946955, a: 1}

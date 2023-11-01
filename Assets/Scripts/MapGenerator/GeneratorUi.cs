@@ -10,6 +10,7 @@ namespace MapGenerator
 {
     public class GeneratorUi : MonoBehaviour
     {
+        [SerializeField] private GameObject mesh;
         [SerializeField] private Button generateButton;
         [SerializeField] private Button generatePreviewButton;
         [SerializeField] private Button viewParametersButton;
@@ -142,7 +143,9 @@ namespace MapGenerator
         private void GenerateMapPreview()
         {
             if (!_paramHasChanged) return;
+            if(!_mapInfoIsClear) return;
 
+            mesh.SetActive(true);
             _mapInfoController.CreateMapGraphic();
         }
 
@@ -152,6 +155,7 @@ namespace MapGenerator
 
             _mapInfoIsClear = false;
             _mapInfoController.CreateMapInfo();
+            mesh.SetActive(false);
         }
 
         private void ToggleMenu()
@@ -205,6 +209,7 @@ namespace MapGenerator
                 _mapInfoController.ClearMap();
             }
             
+            mesh.SetActive(true);
             _mapInfoController.CreateMapGraphic();
         }
         
@@ -222,6 +227,7 @@ namespace MapGenerator
                 _mapInfoController.ClearMap();
             }
             
+            mesh.SetActive(true);
             _mapInfoController.CreateMapGraphic();
         }
     }
