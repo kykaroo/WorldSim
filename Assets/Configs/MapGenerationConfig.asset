@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffb746d3da8a4eeeb69ea087bef74f99, type: 3}
   m_Name: MapGenerationConfig
   m_EditorClassIdentifier: 
-  tilePrefab: {fileID: -7836320636925867615, guid: 57cb54905153bc14aa0f14693385edca, type: 3}
+  buildMode: 0
+  constructionTileToPlace: 0
   drawMode: 1
-  tileToPlace: 0
+  worldTileToPlace: 0
   tileSize: 1
   mapWidth: 100
   mapHeight: 100
@@ -33,3 +34,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dc8750912b423224b92d389bd5d56fa4, type: 2}
   - {fileID: 11400000, guid: 3f0b86cf21fe296449875084bad53520, type: 2}
   - {fileID: 11400000, guid: 445e203c39ede0a4bb5a2ff559d811a5, type: 2}
+  constructionConfigs:
+  - {fileID: 11400000, guid: 86edc784118fc7a459dfbdc1acc746b4, type: 2}
+  - {fileID: 11400000, guid: 784937ab43afa6345b83c4687da0b161, type: 2}

@@ -27,7 +27,9 @@ namespace MapGenerator
         [SerializeField] private TMP_InputField offsetY;
         [SerializeField] private Toggle autoUpdate;
         [SerializeField] private GameObject parametersPanel;
-        [SerializeField] private TMP_Dropdown tileType;
+        [SerializeField] private TMP_Dropdown worldTileType;
+        [SerializeField] private TMP_Dropdown buildMode;
+        [SerializeField] private TMP_Dropdown constructionTileType;
 
         private GenerationConfig _config;
         private MapInfoController _mapInfoController;
@@ -56,7 +58,8 @@ namespace MapGenerator
                 "Noise map",
                 "Color map"
             };
-            var tileTypeList = new List<string>
+            
+            var worldTileTypeList = new List<string>
             {
                 "None",
                 "Ocean",
@@ -66,10 +69,29 @@ namespace MapGenerator
                 "Mountain",
                 "Summit"
             };
+            
+            var buildModeList = new List<string>
+            {
+                "World",
+                "Construction"
+            };
+            
+            var constructionTileTypeList = new List<string>
+            {
+                "None",
+                "Wall"
+            };
+            
+            
             drawMode.ClearOptions();
-            tileType.ClearOptions();
+            worldTileType.ClearOptions();
+            buildMode.ClearOptions();
+            constructionTileType.ClearOptions();
+            
             drawMode.AddOptions(drawModeList);
-            tileType.AddOptions(tileTypeList);
+            worldTileType.AddOptions(worldTileTypeList);
+            buildMode.AddOptions(buildModeList);
+            constructionTileType.AddOptions(constructionTileTypeList);
 
             parametersPanel.SetActive(false);
 
@@ -111,7 +133,9 @@ namespace MapGenerator
             generateButton.onClick.AddListener(GenerateMap);
             generatePreviewButton.onClick.AddListener(GenerateMapPreview);
             drawMode.onValueChanged.AddListener(ChangeDrawMode);
-            tileType.onValueChanged.AddListener(ChangeTileType);
+            worldTileType.onValueChanged.AddListener(ChangeWorldTileType);
+            buildMode.onValueChanged.AddListener(ChangeBuildMode);
+            constructionTileType.onValueChanged.AddListener(ChangeConstructionTileType);
             mapWidth.onValueChanged.AddListener(b => _config.mapWidth = int.Parse(b));
             mapHeight.onValueChanged.AddListener(b => _config.mapHeight = int.Parse(b));
             levelOfDetail.onValueChanged.AddListener(b => _config.levelOfDetail = int.Parse(b));
@@ -125,9 +149,29 @@ namespace MapGenerator
             autoUpdate.onValueChanged.AddListener(ToggleAutoUpdate);
         }
 
-        private void ChangeTileType(int arg0)
+        private void ChangeBuildMode(int arg0)
         {
-            _config.tileToPlace = arg0 switch
+            _config.buildMode = arg0 switch
+            {
+                0 => BuildMode.World,
+                1 => BuildMode.Construction,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private void ChangeConstructionTileType(int arg0)
+        {
+            _config.constructionTileToPlace = arg0 switch
+            {
+                0 => ConstructionTileTypes.None,
+                1 => ConstructionTileTypes.Wall,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        private void ChangeWorldTileType(int arg0)
+        {
+            _config.worldTileToPlace = arg0 switch
             {
                 0 => TileType.None,
                 1 => TileType.Ocean,

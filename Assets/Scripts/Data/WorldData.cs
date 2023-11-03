@@ -9,12 +9,14 @@ namespace Data
         public Tile[,] Tiles;
         public int Width;
         public int Height;
-        public readonly Tilemap Tilemap;
+        public readonly Tilemap WorldTilemap;
+        public readonly Tilemap ConstructionTilemap;
 
         [Inject]
-        public WorldData(Tilemap tilemap)
+        public WorldData(Tilemap worldTilemap, Tilemap constructionTilemap)
         {
-            Tilemap = tilemap;
+            WorldTilemap = worldTilemap;
+            ConstructionTilemap = constructionTilemap;
         }
 
         public void Initialize(int width, int height)

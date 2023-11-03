@@ -1,6 +1,5 @@
 ﻿using System;
 using Data;
-using UnityEngine;
 
 namespace MapGenerator
 {
@@ -9,22 +8,37 @@ namespace MapGenerator
         public int X { get; private set; }
         public int Y { get; private set; }
         private TileType _type;
+        private ConstructionTileTypes? _installedObject;
         public TileType Type
         {
             get => _type;
             set
             {
                 _type = value;
+                PassageCheck();
+                
                 OnTileTypeChanged?.Invoke(this);
             }
         }
 
         public bool IsPassable { get; private set; }
+        public bool InstallObjectValid { get; private set; }
         public LooseObject LooseObject { get; private set; }
-        public InstalledObject InstalledObject { get; private set; }
+
+        public ConstructionTileTypes? InstalledObject
+        {
+            get => _installedObject;
+            set
+            {
+                _installedObject = value;
+                
+                OnConstructionTileTypeChanged?.Invoke(this);
+            }
+        }
         public GenerationConfig Config { get; private set; }
 
         public event Action<Tile> OnTileTypeChanged;
+        public event Action<Tile> OnConstructionTileTypeChanged;
 
         public void Initialize(int x, int y, TileType tileType, GenerationConfig config)
         {
@@ -33,11 +47,27 @@ namespace MapGenerator
             Config = config;
             _type = tileType;
             
-            IsPassable = tileType switch
+            PassageCheck();
+        }
+        
+        private void PassageCheck()
+        {
+            switch (_type)
             {
-                TileType.Summit => false,
-                _ => IsPassable = true
-            };
+                case TileType.Summit:
+                    IsPassable = false;
+                    InstallObjectValid = false;
+                    break;
+                default:
+                    IsPassable = true;
+                    InstallObjectValid = true;
+                    break;
+            }
+
+            if (_installedObject == null) return;
+            
+            InstallObjectValid = false;
+            IsPassable = false;
         }
     }
 }

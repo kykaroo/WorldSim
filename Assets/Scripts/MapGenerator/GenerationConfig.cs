@@ -7,8 +7,10 @@ namespace MapGenerator
     [CreateAssetMenu(menuName = "MapGeneration/MapGenerationConfig", fileName = "Map Generation")]
     public class GenerationConfig : ScriptableObject
     {
+        public BuildMode buildMode;
+        public ConstructionTileTypes constructionTileToPlace;
         public DrawMode drawMode;
-        public TileType tileToPlace;
+        public TileType worldTileToPlace;
         public int tileSize;
 
         public int mapWidth;
@@ -28,6 +30,7 @@ namespace MapGenerator
         public bool autoUpdate;
 
         public RegionConfig[] regions;
+        public ConstructionConfig[] constructionConfigs;
 
         public IOrderedEnumerable<RegionConfig> OrderedRegions;
     }
