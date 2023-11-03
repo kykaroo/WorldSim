@@ -56,10 +56,10 @@ namespace PlayerControllers
             else
             {
                 _tilemap.ClearAllTiles();
-                var vector3Int = new Vector3Int(tileUnderMouse.X, tileUnderMouse.Y, 0);
-                _tilemap.SetTile(vector3Int, _tile);
-                _tilemap.SetTileFlags(vector3Int, TileFlags.None);
-                _tilemap.SetColor(vector3Int, _tileColor);
+                var tilePos = new Vector3Int(tileUnderMouse.X, tileUnderMouse.Y, 0);
+                _tilemap.SetTile(tilePos, _tile);
+                _tilemap.SetTileFlags(tilePos, TileFlags.None);
+                _tilemap.SetColor(tilePos, _tileColor);
             }
         }
 
@@ -70,7 +70,7 @@ namespace PlayerControllers
                 _dragStart = currentMousePosition;
                 _dragAction = true;
             }
-        
+            
             var startX = Mathf.FloorToInt(_dragStart.x + TileOffset);
             var endX = Mathf.FloorToInt(currentMousePosition.x + TileOffset);
             var startY = Mathf.FloorToInt(_dragStart.y + TileOffset);
@@ -88,48 +88,70 @@ namespace PlayerControllers
 
             if (Input.GetKey(KeyCode.Mouse0))
             {
-                for (var x = startX; x <= endX; x++)
-                {
-                    for (var y = startY; y <= endY; y++)
-                    {
-                        var t = _worldController.GetTile(x, y);
+                DragHighLight(startX, endX, startY, endY);
+            }
 
-                        if (t != null)
+            if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+                DragEnd(startX, endX, startY, endY);
+            }
+        }
+
+        private void DragEnd(int startX, int endX, int startY, int endY)
+        {
+            for (var x = startX; x <= endX; x++)
+            {
+                for (var y = startY; y <= endY; y++)
+                {
+                    var t = _worldController.GetTile(x, y);
+
+                    if (t != null)
+                    {
+                        switch (_config.tileToPlace)
                         {
-                            var vector3Int = new Vector3Int(x, y, 0);
-                            _tilemap.SetTile(vector3Int, _tile);
-                            _tilemap.SetTileFlags(vector3Int, TileFlags.None);
-                            _tilemap.SetColor(vector3Int, _tileColor);
+                            case TileType.None:
+                                if (startX == endX && startY == endY)
+                                {
+                                    Debug.Log($"({t.X}, {t.Y})");
+                                }
+                                else
+                                {
+                                    Debug.Log($"({startX}, {startY}) - ({endX}, {endY})");
+                                }
+                                
+                                _dragAction = false;
+                                _tilemap.ClearAllTiles();
+                                return;
+                            default:
+                                if (_config.drawMode == DrawMode.NoiseMap) return;
+                                t.Type = _config.tileToPlace;
+                                break;
                         }
                     }
                 }
             }
 
-            if (Input.GetKeyUp(KeyCode.Mouse0))
+            _dragAction = false;
+            _tilemap.ClearAllTiles();
+        }
+
+        private void DragHighLight(int startX, int endX, int startY, int endY)
+        {
+            _tilemap.ClearAllTiles();
+
+            for (var x = startX; x <= endX; x++)
             {
-                for (var x = startX; x <= endX; x++)
+                for (var y = startY; y <= endY; y++)
                 {
-                    for (var y = startY; y <= endY; y++)
-                    {
-                        var t = _worldController.GetTile(x, y);
+                    var t = _worldController.GetTile(x, y);
 
-                        if (t != null)
-                        {
-                            switch (_config.tileToPlace)
-                            {
-                                case TileType.None:
-                                    Debug.Log($"{t.X}, {t.Y}");
-                                    break;
-                                default:
-                                    if (_config.drawMode == DrawMode.NoiseMap) return;
-                                    t.Type = _config.tileToPlace;
-                                    break;
-                            }
-                        }
-                    }
+                    if (t == null) continue;
+                    
+                    var vector3Int = new Vector3Int(x, y, 0);
+                    _tilemap.SetTile(vector3Int, _tile);
+                    _tilemap.SetTileFlags(vector3Int, TileFlags.None);
+                    _tilemap.SetColor(vector3Int, _tileColor);
                 }
-
-                _tilemap.ClearAllTiles();
             }
         }
 
