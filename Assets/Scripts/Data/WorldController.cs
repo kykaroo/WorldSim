@@ -27,7 +27,7 @@ public class WorldController
     {
         ClearAllTiles();
             
-        _worldData.Initialize(_config.mapWidth, _config.mapHeight, _config.tilePrefab);
+        _worldData.Initialize(_config.mapWidth, _config.mapHeight);
     }
 
     public void CreateTile(Tile tile)

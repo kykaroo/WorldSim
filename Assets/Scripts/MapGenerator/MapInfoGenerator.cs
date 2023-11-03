@@ -1,4 +1,5 @@
-﻿using Zenject;
+﻿using System.Threading.Tasks;
+using Zenject;
 
 namespace MapGenerator
 {
@@ -14,7 +15,7 @@ namespace MapGenerator
             _worldController = worldController;
         }
 
-        public void GenerateMap()
+        public async Task GenerateMap()
         {
             var configMapWidth = _config.mapWidth;
             var configMapHeight = _config.mapHeight;
@@ -39,6 +40,8 @@ namespace MapGenerator
                         break;
                     }
                 }
+
+                await Task.Yield();
             }
             
             _worldController.FirstGeneration = false;

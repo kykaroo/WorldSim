@@ -6,7 +6,6 @@ namespace Data
 {
     public class WorldData
     {
-        public Tile TilePrefab;
         public Tile[,] Tiles;
         public int Width;
         public int Height;
@@ -18,11 +17,10 @@ namespace Data
             Tilemap = tilemap;
         }
 
-        public void Initialize(int width, int height, Tile tilePrefab)
+        public void Initialize(int width, int height)
         {
             Width = width;
             Height = height;
-            TilePrefab = tilePrefab;
             Tiles = new Tile[width, height];
         }
     }
