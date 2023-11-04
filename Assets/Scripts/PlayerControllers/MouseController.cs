@@ -22,6 +22,7 @@ namespace PlayerControllers
         private readonly BaseTile _tile;
         private Vector3 _currentMousePosition;
         private bool _dragAction;
+        private bool _isDragAction;
         private readonly Color _tileColor = new(1f, 1, 1, 0.45f);
         private Tile _tileUnderMouse;
         private Tile _selectedTile;
@@ -71,7 +72,6 @@ namespace PlayerControllers
             if (_dragAction) return;
             
             _tilemap.ClearAllTiles();
-
             HighlightSelectedTile();
 
             if (_tileUnderMouse != null)
@@ -126,6 +126,9 @@ namespace PlayerControllers
             if (Input.GetKeyUp(KeyCode.Mouse0))
             {
                 DragEnd(startX, endX, startY, endY);
+
+                if (_isDragAction) return;
+
                 _selectedTile = _tileUnderMouse;
                 OnSelectedTileChanged?.Invoke(_selectedTile);
             }
@@ -133,6 +136,8 @@ namespace PlayerControllers
 
         private void DragEnd(int startX, int endX, int startY, int endY)
         {
+            _isDragAction = !(startX == endX && startY == endY);
+            
             for (var x = startX; x <= endX; x++)
             {
                 for (var y = startY; y <= endY; y++)
@@ -190,6 +195,7 @@ namespace PlayerControllers
             private void DragHighLight(int startX, int endX, int startY, int endY)
             {
                 _tilemap.ClearAllTiles();
+                HighlightSelectedTile();
 
                 for (var x = startX; x <= endX; x++)
                 {
