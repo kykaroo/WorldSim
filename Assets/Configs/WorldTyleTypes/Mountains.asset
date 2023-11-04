@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84f85cb3bdff4571aefc24c9ca40a8f1, type: 3}
   m_Name: Mountains
   m_EditorClassIdentifier: 
-  tileType: 5
+  tileWorldType: 5
   tileSprite: {fileID: 21300000, guid: 532a43d07729b814c92b7d02ba7231ec, type: 3}
   tileMaterial: {fileID: 2100000, guid: e6be074132d2b1148afbf176e7fb2a83, type: 2}
   Name: Mountains

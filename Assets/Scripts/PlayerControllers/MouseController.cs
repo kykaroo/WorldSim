@@ -2,6 +2,7 @@
 using Data;
 using MapGenerator;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
 using Zenject;
 using Tile = MapGenerator.Tile;
@@ -22,6 +23,9 @@ namespace PlayerControllers
         private Vector3 _currentMousePosition;
         private bool _dragAction;
         private readonly Color _tileColor = new(1f, 1, 1, 0.45f);
+        private Tile _tileUnderMouse;
+
+        public event Action<Tile> OnTileUnderMouseChanged;
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
@@ -39,11 +43,26 @@ namespace PlayerControllers
         public void Tick()
         {
             _currentMousePosition = _camera.ScreenToWorldPoint(Input.mousePosition);
-            var tileUnderMouse = GetTileAtWorldCoord(_currentMousePosition.x, _currentMousePosition.y);
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                _tilemap.ClearAllTiles();
+                return;
+            }
+            
+            GetTileUnderMouse();
 
-            HighLightUnderMouse(tileUnderMouse);
+            HighLightUnderMouse(_tileUnderMouse);
 
             DragMove(_currentMousePosition);
+        }
+
+        private void GetTileUnderMouse()
+        {
+            var tileUnderMouse = GetTileAtWorldCoord(_currentMousePosition.x, _currentMousePosition.y);
+            if (_tileUnderMouse == tileUnderMouse) return;
+
+            _tileUnderMouse = tileUnderMouse;
+            OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
         }
 
         private void HighLightUnderMouse(Tile tileUnderMouse)
@@ -111,9 +130,9 @@ namespace PlayerControllers
                         switch (_config.buildMode)
                         {
                             case BuildMode.World:
-                                switch (_config.worldTileToPlace)
+                                switch (_config.worldTileWorldToPlace)
                                 {
-                                    case TileType.None:
+                                    case TileWorldType.None:
                                         if (startX == endX && startY == endY)
                                         {
                                             Debug.Log($"({t.X}, {t.Y})");
@@ -128,7 +147,8 @@ namespace PlayerControllers
                                         return;
                                     default:
                                         if (_config.drawMode == DrawMode.NoiseMap) return;
-                                        t.Type = _config.worldTileToPlace;
+                                        t.WorldType = _config.worldTileWorldToPlace;
+                                        OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
                                         break;
                                 }
                                 break;
@@ -137,7 +157,8 @@ namespace PlayerControllers
                                         {
                                             default:
                                                 if (_config.drawMode == DrawMode.NoiseMap) return;
-                                                t.InstalledObject = _config.constructionTileToPlace;
+                                                t.PlaceConstruction(_config.constructionTileToPlace);
+                                                OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
                                                 break; 
                                         } 
                                         break;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
+using PlayerControllers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,19 +31,27 @@ namespace MapGenerator
         [SerializeField] private TMP_Dropdown worldTileType;
         [SerializeField] private TMP_Dropdown buildMode;
         [SerializeField] private TMP_Dropdown constructionTileType;
+        [SerializeField] private GameObject tileInfoPanel;
+        [SerializeField] private TextMeshProUGUI tileCoordsText;
+        [SerializeField] private TextMeshProUGUI tileWorldTypeText;
+        [SerializeField] private TextMeshProUGUI tileConstructionTypeText;
+        [SerializeField] private TextMeshProUGUI tileWalkSpeedText;
 
         private GenerationConfig _config;
         private MapInfoController _mapInfoController;
+        private MouseController _mouseController;
         private bool _isAutoUpdate;
         private Dictionary<DrawMode, int> _drawModeIds;
         private bool _paramHasChanged;
         private bool _mapInfoIsClear;
 
         [Inject]
-        public void Initialize(MapInfoController mapInfoController, GenerationConfig config)
+        public void Initialize(MapInfoController mapInfoController, GenerationConfig config, MouseController mouseController)
         {
             _config = config;
             _mapInfoController = mapInfoController;
+            _mouseController = mouseController;
+            _mouseController.OnTileUnderMouseChanged += UpdateTileInfo;
             
             _drawModeIds = new()
             {
@@ -108,6 +117,23 @@ namespace MapGenerator
             GenerateMap();
         }
 
+        private void UpdateTileInfo(Tile tile)
+        {
+            if (!_mapInfoController.GenerationComplete) return;
+            
+            if (tile == null)
+            {
+                tileInfoPanel.SetActive(false);
+                return;
+            }
+            
+            tileInfoPanel.SetActive(true);
+            tileCoordsText.text = $"X: {tile.X}, Y: {tile.Y}";
+            tileWorldTypeText.text = $"Tile world type: {tile.WorldType}";
+            tileConstructionTypeText.text = $"Tile world type: {tile.InstalledObject.Type}";
+            tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
+        }
+
         private void InitializeValues()
         {
             _drawModeIds.TryGetValue(_config.drawMode,out var drawModeId);
@@ -171,15 +197,15 @@ namespace MapGenerator
 
         private void ChangeWorldTileType(int arg0)
         {
-            _config.worldTileToPlace = arg0 switch
+            _config.worldTileWorldToPlace = arg0 switch
             {
-                0 => TileType.None,
-                1 => TileType.Ocean,
-                2 => TileType.Sand,
-                3 => TileType.Grass,
-                4 => TileType.Rocks,
-                5 => TileType.Mountain,
-                6 => TileType.Summit,
+                0 => TileWorldType.None,
+                1 => TileWorldType.Water,
+                2 => TileWorldType.Sand,
+                3 => TileWorldType.Grass,
+                4 => TileWorldType.Rocks,
+                5 => TileWorldType.Mountain,
+                6 => TileWorldType.Summit,
                 _ => throw new ArgumentException()
             };
         }

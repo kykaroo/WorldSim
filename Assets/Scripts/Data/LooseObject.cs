@@ -1,4 +1,7 @@
-﻿public class LooseObject
+﻿namespace Data
 {
+    public class LooseObject
+    {
         
+    }
 }

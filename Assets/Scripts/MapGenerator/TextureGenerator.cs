@@ -36,9 +36,9 @@ namespace MapGenerator
             return TextureFromColourMap(colorMap, width, height);
         }
 
-        public Texture2D ChangePixel(Texture2D texture, int x, int y, TileType tileType, GenerationConfig config)
+        public Texture2D ChangePixel(Texture2D texture, int x, int y, TileWorldType tileWorldType, GenerationConfig config)
         {
-            texture.SetPixel(x,y, config.regions.First(b => b.tileType == tileType).color);
+            texture.SetPixel(x,y, config.regions.First(b => b.tileWorldType == tileWorldType).color);
             texture.Apply();
 
             return texture;

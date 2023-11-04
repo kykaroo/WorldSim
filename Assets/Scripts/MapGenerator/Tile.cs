@@ -7,67 +7,70 @@ namespace MapGenerator
     {
         public int X { get; private set; }
         public int Y { get; private set; }
-        private TileType _type;
-        private ConstructionTileTypes? _installedObject;
-        public TileType Type
+        private TileWorldType _worldType;
+        private float _tileWalkSpeedMultiplier;
+        public TileWorldType WorldType
         {
-            get => _type;
+            get => _worldType;
             set
             {
-                _type = value;
-                PassageCheck();
+                _worldType = value;
+                _tileWalkSpeedMultiplier = _worldType switch
+                {
+                    TileWorldType.Summit => 0,
+                    TileWorldType.Water => 0.1f,
+                    TileWorldType.Sand => 0.9f,
+                    TileWorldType.Grass => 1,
+                    TileWorldType.Rocks => 0.9f,
+                    TileWorldType.Mountain => 0.4f,
+                    _ => 0
+                };
                 
+                RecalculateSpeed();
                 OnTileTypeChanged?.Invoke(this);
             }
         }
 
-        public bool IsPassable { get; private set; }
+        public float WalkSpeedMultiplier { get; private set; }
+        
         public bool InstallObjectValid { get; private set; }
         public LooseObject LooseObject { get; private set; }
 
-        public ConstructionTileTypes? InstalledObject
-        {
-            get => _installedObject;
-            set
-            {
-                _installedObject = value;
-                
-                OnConstructionTileTypeChanged?.Invoke(this);
-            }
-        }
-        public GenerationConfig Config { get; private set; }
+        public InstalledObject InstalledObject { get; private set; }
 
         public event Action<Tile> OnTileTypeChanged;
         public event Action<Tile> OnConstructionTileTypeChanged;
 
-        public void Initialize(int x, int y, TileType tileType, GenerationConfig config)
+        private void ConstructionTileTypeChanged()
+        {
+            RecalculateSpeed();
+            OnConstructionTileTypeChanged?.Invoke(this);
+        }
+
+        public void Initialize(int x, int y, TileWorldType tileWorldType)
         {
             X = x;
             Y = y;
-            Config = config;
-            _type = tileType;
-            
-            PassageCheck();
+            WorldType = tileWorldType;
+            InstalledObject = new(ConstructionTileTypes.None, this);
+            InstalledObject.OnTileTypeChanged += ConstructionTileTypeChanged;
+            RecalculateSpeed();
         }
-        
-        private void PassageCheck()
-        {
-            switch (_type)
-            {
-                case TileType.Summit:
-                    IsPassable = false;
-                    InstallObjectValid = false;
-                    break;
-                default:
-                    IsPassable = true;
-                    InstallObjectValid = true;
-                    break;
-            }
 
-            if (_installedObject == null) return;
+        private void RecalculateSpeed()
+        {
+            if (InstalledObject == null)
+            {
+                WalkSpeedMultiplier = _tileWalkSpeedMultiplier;
+                return;
+            }
             
-            InstallObjectValid = false;
-            IsPassable = false;
+            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * InstalledObject.WalkSpeedMultiplier;
+        }
+
+        public void PlaceConstruction(ConstructionTileTypes type)
+        {
+            InstalledObject.Type = type;
         }
     }
 }

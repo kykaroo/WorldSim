@@ -13,7 +13,6 @@ namespace DependencyInjection
         [SerializeField] private new Renderer renderer;
         [SerializeField] private GeneratorUi generatorUi;
         [SerializeField] private CameraConfig cameraConfig;
-        [SerializeField] private Camera camera;
         [SerializeField] private Tilemap worldTilemap;
         [SerializeField] private Tilemap highLightTilemap;
         [SerializeField] private Tilemap constructionTilemap;

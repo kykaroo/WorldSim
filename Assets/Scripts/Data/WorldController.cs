@@ -44,7 +44,7 @@ namespace Data
 
         private void TileChanged(Tile tile)
         {
-            _worldData.WorldTilemap.SetColor(new(tile.X, tile.Y, 0), _config.regions.First(b => b.tileType == tile.Type).color);
+            _worldData.WorldTilemap.SetColor(new(tile.X, tile.Y, 0), _config.regions.First(b => b.tileWorldType == tile.WorldType).color);
         }
 
         public void ClearAllTiles()
@@ -54,6 +54,7 @@ namespace Data
             foreach (var tile in _worldData.Tiles)
             {
                 tile.OnTileTypeChanged -= TileChanged;
+                tile.OnConstructionTileTypeChanged -= ConstructionTileChanged;
             }
 
             _worldData.WorldTilemap.ClearAllTiles(); 
@@ -64,7 +65,7 @@ namespace Data
         {
             var tile = ScriptableObject.CreateInstance<Tile>();
             var tilePos = new Vector3Int(x,y,0);
-            tile.Initialize(x, y, region.tileType, _config);
+            tile.Initialize(x, y, region.tileWorldType);
             tile.sprite = region.tileSprite;
             tile.OnTileTypeChanged += TileChanged;
             tile.OnConstructionTileTypeChanged += ConstructionTileChanged;
@@ -78,7 +79,7 @@ namespace Data
         private void ConstructionTileChanged(Tile tile)
         {
             var baseTile = ScriptableObject.CreateInstance<BaseTile>();
-            baseTile.sprite = _config.constructionConfigs.First(b => b.type == tile.InstalledObject).sprite;
+            baseTile.sprite = _config.constructionConfigs.First(b => b.type == tile.InstalledObject.Type).sprite;
             _worldData.ConstructionTilemap.SetTile(new(tile.X, tile.Y, 0), baseTile);
         }
 

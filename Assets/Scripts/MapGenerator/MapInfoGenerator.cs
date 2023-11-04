@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Data;
 using Zenject;
 
@@ -9,6 +10,9 @@ namespace MapGenerator
         private readonly GenerationConfig _config;
         private readonly WorldController _worldController;
 
+        public event Action OnMapGenerationStart;
+        public event Action OnMapGenerationComplete;
+
         [Inject]
         public MapInfoGenerator(GenerationConfig config, WorldController worldController)
         {
@@ -18,6 +22,7 @@ namespace MapGenerator
 
         public async Task GenerateMap()
         {
+            OnMapGenerationStart?.Invoke();
             var configMapWidth = _config.mapWidth;
             var configMapHeight = _config.mapHeight;
             
@@ -43,6 +48,8 @@ namespace MapGenerator
 
                 await Task.Yield();
             }
+            
+            OnMapGenerationComplete?.Invoke();
         }
 
         private void GenerateTile(int x, int y, RegionConfig region)

@@ -14,6 +14,8 @@ namespace MapGenerator
         private readonly GenerationConfig _config;
         private Texture2D _texture;
 
+        public bool GenerationComplete;
+
         [Inject]
         public MapInfoController(WorldController worldController, MapGraphicGenerator mapGraphicGenerator, 
             MapInfoGenerator mapInfoGenerator, MapDisplay mapDisplay, TextureGenerator textureGenerator,
@@ -25,6 +27,9 @@ namespace MapGenerator
             _mapDisplay = mapDisplay;
             _textureGenerator = textureGenerator;
             _config = config;
+
+            mapInfoGenerator.OnMapGenerationStart += () => GenerationComplete = false;
+            mapInfoGenerator.OnMapGenerationComplete += () => GenerationComplete = true;
 
             // _worldController.OnTileChanged += ChangePixel;
         }
@@ -46,7 +51,7 @@ namespace MapGenerator
 
         private void ChangePixel(Tile tile)
         {
-            _texture = _textureGenerator.ChangePixel(_texture, tile.X, tile.Y, tile.Type, _config);
+            _texture = _textureGenerator.ChangePixel(_texture, tile.X, tile.Y, tile.WorldType, _config);
             _mapDisplay.DrawTexture(_texture, _config);
         }
     }

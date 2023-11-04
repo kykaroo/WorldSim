@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Data;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "TileConfig/ConstructionConfig", fileName = "Construction Config")]
 public class ConstructionConfig : ScriptableObject
