@@ -16,3 +16,6 @@ MonoBehaviour:
   type: 0
   sprite: {fileID: 0}
   color: {r: 1, g: 1, b: 1, a: 1}
+  moveSpeedMultiplier: 1
+  width: 1
+  height: 1

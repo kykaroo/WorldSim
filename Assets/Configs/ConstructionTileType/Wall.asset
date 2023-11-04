@@ -16,3 +16,5 @@ MonoBehaviour:
   type: 1
   sprite: {fileID: 2124647212, guid: 9a8e609fb31e7b14f90cd17e3eb44012, type: 3}
   color: {r: 1, g: 1, b: 1, a: 1}
+  width: 1
+  height: 1

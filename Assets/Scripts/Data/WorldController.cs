@@ -65,7 +65,7 @@ namespace Data
         {
             var tile = ScriptableObject.CreateInstance<Tile>();
             var tilePos = new Vector3Int(x,y,0);
-            tile.Initialize(x, y, region.tileWorldType);
+            tile.Initialize(x, y, region.tileWorldType, _config);
             tile.sprite = region.tileSprite;
             tile.OnTileTypeChanged += TileChanged;
             tile.OnConstructionTileTypeChanged += ConstructionTileChanged;

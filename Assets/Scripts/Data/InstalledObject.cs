@@ -1,37 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using MapGenerator;
 
 namespace Data
 {
     public class InstalledObject
     {
-        public Tile Tile;
+        public List<Tile> MainTile;
         public float WalkSpeedMultiplier;
         private ConstructionTileTypes _type;
+        private int _width;
+        private int _height;
+        private readonly GenerationConfig _config;
         
         public ConstructionTileTypes Type
         {
             get => _type;
-            set
+            private set
             {
                 _type = value;
-                
-                WalkSpeedMultiplier = Type switch
-                {
-                    ConstructionTileTypes.None => 1,
-                    ConstructionTileTypes.Wall => 0,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-                
+                var building = _config.constructionConfigs.First(b => b.type == _type);
+
+                WalkSpeedMultiplier = building.moveSpeedMultiplier;
+
+
                 OnTileTypeChanged?.Invoke();
             }
         }
 
         public event Action OnTileTypeChanged;
 
-        public InstalledObject(ConstructionTileTypes type, Tile tile)
+        public InstalledObject(Tile mainTile, GenerationConfig config)
         {
-            Tile = tile;
+            _config = config;
+            Type = ConstructionTileTypes.None;
+        }
+
+        public void InstallObject(ConstructionTileTypes type)
+        {
             Type = type;
         }
     }

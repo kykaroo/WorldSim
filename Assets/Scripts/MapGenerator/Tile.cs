@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Data;
 
 namespace MapGenerator
@@ -7,24 +8,17 @@ namespace MapGenerator
     {
         public int X { get; private set; }
         public int Y { get; private set; }
-        private TileWorldType _worldType;
+        private GenerationConfig Config { get; set; }
+        private TileWorldType _worldTileType;
         private float _tileWalkSpeedMultiplier;
         public TileWorldType WorldType
         {
-            get => _worldType;
+            get => _worldTileType;
             set
             {
-                _worldType = value;
-                _tileWalkSpeedMultiplier = _worldType switch
-                {
-                    TileWorldType.Summit => 0,
-                    TileWorldType.Water => 0.1f,
-                    TileWorldType.Sand => 0.9f,
-                    TileWorldType.Grass => 1,
-                    TileWorldType.Rocks => 0.9f,
-                    TileWorldType.Mountain => 0.4f,
-                    _ => 0
-                };
+                _worldTileType = value;
+                _tileWalkSpeedMultiplier =
+                    Config.regions.First(region => region.tileWorldType == _worldTileType).moveSpeedMultiplier;
                 
                 RecalculateSpeed();
                 OnTileTypeChanged?.Invoke(this);
@@ -47,12 +41,14 @@ namespace MapGenerator
             OnConstructionTileTypeChanged?.Invoke(this);
         }
 
-        public void Initialize(int x, int y, TileWorldType tileWorldType)
+        public void Initialize(int x, int y, TileWorldType tileWorldType, GenerationConfig config)
         {
             X = x;
             Y = y;
+            Config = config;
+            
             WorldType = tileWorldType;
-            InstalledObject = new(ConstructionTileTypes.None, this);
+            InstalledObject = new(this, config);
             InstalledObject.OnTileTypeChanged += ConstructionTileTypeChanged;
             RecalculateSpeed();
         }
@@ -66,11 +62,14 @@ namespace MapGenerator
             }
             
             WalkSpeedMultiplier = _tileWalkSpeedMultiplier * InstalledObject.WalkSpeedMultiplier;
-        }
 
-        public void PlaceConstruction(ConstructionTileTypes type)
-        {
-            InstalledObject.Type = type;
+            if (WalkSpeedMultiplier == 0)
+            {
+                InstallObjectValid = false;
+                return;
+            }
+
+            InstallObjectValid = true;
         }
     }
 }

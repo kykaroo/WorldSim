@@ -3,6 +3,7 @@
     public enum ConstructionTileTypes
     {
         None,
-        Wall
+        Wall,
+        Statue
     }
 }

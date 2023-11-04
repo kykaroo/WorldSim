@@ -8,4 +8,7 @@ public class ConstructionConfig : ScriptableObject
     public ConstructionTileTypes type;
     public Sprite sprite;
     public Color color;
+    public float moveSpeedMultiplier;
+    public int width;
+    public int height;
 }

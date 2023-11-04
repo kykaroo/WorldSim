@@ -7,6 +7,7 @@ namespace MapGenerator
     public class RegionConfig : ScriptableObject
     {
         public TileWorldType tileWorldType;
+        public float moveSpeedMultiplier;
         public Sprite tileSprite;
         public Material tileMaterial;
         public string Name;

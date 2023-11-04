@@ -89,7 +89,8 @@ namespace MapGenerator
             var constructionTileTypeList = new List<string>
             {
                 "None",
-                "Wall"
+                "Wall",
+                "Statue"
             };
             
             
@@ -192,8 +193,11 @@ namespace MapGenerator
             {
                 0 => ConstructionTileTypes.None,
                 1 => ConstructionTileTypes.Wall,
+                2 => ConstructionTileTypes.Statue,
                 _ => throw new ArgumentOutOfRangeException()
             };
+            
+            _mouseController.ConstructionTileTypeChange();
         }
 
         private void ChangeWorldTileType(int arg0)

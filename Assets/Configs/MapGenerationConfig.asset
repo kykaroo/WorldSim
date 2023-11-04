@@ -15,7 +15,7 @@ MonoBehaviour:
   buildMode: 0
   constructionTileToPlace: 0
   drawMode: 1
-  worldTileToPlace: 0
+  worldTileWorldToPlace: 0
   tileSize: 1
   mapWidth: 100
   mapHeight: 100
@@ -37,3 +37,4 @@ MonoBehaviour:
   constructionConfigs:
   - {fileID: 11400000, guid: 86edc784118fc7a459dfbdc1acc746b4, type: 2}
   - {fileID: 11400000, guid: 784937ab43afa6345b83c4687da0b161, type: 2}
+  - {fileID: 11400000, guid: 71d2a761b5a62fe42883caa5928c9b4e, type: 2}
