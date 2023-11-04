@@ -51,7 +51,8 @@ namespace MapGenerator
             _config = config;
             _mapInfoController = mapInfoController;
             _mouseController = mouseController;
-            _mouseController.OnTileUnderMouseChanged += UpdateTileInfo;
+            tileInfoPanel.SetActive(false);
+            _mouseController.OnSelectedTileChanged += UpdateTileInfo;
             
             _drawModeIds = new()
             {

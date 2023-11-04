@@ -24,8 +24,9 @@ namespace PlayerControllers
         private bool _dragAction;
         private readonly Color _tileColor = new(1f, 1, 1, 0.45f);
         private Tile _tileUnderMouse;
+        private Tile _selectedTile;
 
-        public event Action<Tile> OnTileUnderMouseChanged;
+        public event Action<Tile> OnSelectedTileChanged;
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
@@ -46,12 +47,13 @@ namespace PlayerControllers
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 _tilemap.ClearAllTiles();
+                HighlightSelectedTile();
                 return;
             }
             
             GetTileUnderMouse();
 
-            HighLightUnderMouse(_tileUnderMouse);
+            HighLightUnderMouse();
 
             DragMove(_currentMousePosition);
         }
@@ -62,24 +64,34 @@ namespace PlayerControllers
             if (_tileUnderMouse == tileUnderMouse) return;
 
             _tileUnderMouse = tileUnderMouse;
-            OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
         }
 
-        private void HighLightUnderMouse(Tile tileUnderMouse)
+        private void HighLightUnderMouse()
         {
             if (_dragAction) return;
+            
+            _tilemap.ClearAllTiles();
 
-            if (tileUnderMouse == null)
+            HighlightSelectedTile();
+
+            if (_tileUnderMouse != null)
             {
-                _tilemap.ClearAllTiles();
-            }
-            else
-            {
-                _tilemap.ClearAllTiles();
-                var tilePos = new Vector3Int(tileUnderMouse.X, tileUnderMouse.Y, 0);
+                var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
                 _tilemap.SetTile(tilePos, _tile);
                 _tilemap.SetTileFlags(tilePos, TileFlags.None);
                 _tilemap.SetColor(tilePos, _tileColor);
+            }
+        }
+
+        private void HighlightSelectedTile()
+        {
+            if (_selectedTile != null)
+            {
+                var selectedTilePos = new Vector3Int(_selectedTile.X, _selectedTile.Y, 0);
+                _tilemap.SetTile(selectedTilePos, _tile);
+                _tilemap.SetTileFlags(selectedTilePos, TileFlags.None);
+                _tilemap.SetColor(selectedTilePos, _tileColor);
+                OnSelectedTileChanged?.Invoke(_selectedTile);
             }
         }
 
@@ -114,6 +126,8 @@ namespace PlayerControllers
             if (Input.GetKeyUp(KeyCode.Mouse0))
             {
                 DragEnd(startX, endX, startY, endY);
+                _selectedTile = _tileUnderMouse;
+                OnSelectedTileChanged?.Invoke(_selectedTile);
             }
         }
 
@@ -133,35 +147,34 @@ namespace PlayerControllers
                                 switch (_config.worldTileWorldToPlace)
                                 {
                                     case TileWorldType.None:
-                                        if (startX == endX && startY == endY)
-                                        {
-                                            Debug.Log($"({t.X}, {t.Y})");
-                                        }
-                                        else
-                                        {
-                                            Debug.Log($"({startX}, {startY}) - ({endX}, {endY})");
-                                        }
-
-                                        _dragAction = false;
-                                        _tilemap.ClearAllTiles();
-                                        return;
+                                        break;
+                                    case TileWorldType.Water:
+                                    case TileWorldType.Sand:
+                                    case TileWorldType.Grass:
+                                    case TileWorldType.Rocks:
+                                    case TileWorldType.Mountain:
+                                    case TileWorldType.Summit:
                                     default:
                                         if (_config.drawMode == DrawMode.NoiseMap) return;
                                         t.WorldType = _config.worldTileWorldToPlace;
-                                        OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
+                                        OnSelectedTileChanged?.Invoke(_tileUnderMouse);
                                         break;
                                 }
                                 break;
                                     case BuildMode.Construction:
                                         switch (_config.constructionTileToPlace)
                                         {
+                                            case ConstructionTileTypes.None:
+                                            case ConstructionTileTypes.Wall:
                                             default:
                                                 if (_config.drawMode == DrawMode.NoiseMap) return;
                                                 t.PlaceConstruction(_config.constructionTileToPlace);
-                                                OnTileUnderMouseChanged?.Invoke(_tileUnderMouse);
+                                                OnSelectedTileChanged?.Invoke(_tileUnderMouse);
                                                 break; 
                                         } 
                                         break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
                     
