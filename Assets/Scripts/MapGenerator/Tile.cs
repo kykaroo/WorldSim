@@ -48,28 +48,26 @@ namespace MapGenerator
             Config = config;
             
             WorldType = tileWorldType;
-            InstalledObject = new(this, config);
-            InstalledObject.OnTileTypeChanged += ConstructionTileTypeChanged;
             RecalculateSpeed();
         }
 
         private void RecalculateSpeed()
         {
-            if (InstalledObject == null)
-            {
-                WalkSpeedMultiplier = _tileWalkSpeedMultiplier;
-                return;
-            }
-            
-            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * InstalledObject.WalkSpeedMultiplier;
+            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * InstalledObject?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
 
-            if (WalkSpeedMultiplier == 0)
-            {
-                InstallObjectValid = false;
-                return;
-            }
+            InstallObjectValid = WalkSpeedMultiplier != 0;
+        }
+        
+        public void InstallBuilding(InstalledObject installedObject)
+        {
+            InstalledObject = installedObject;
+            ConstructionTileTypeChanged();
+        }
 
-            InstallObjectValid = true;
+        public void UninstallBuilding()
+        {
+            InstalledObject = null;
+            ConstructionTileTypeChanged();
         }
     }
 }

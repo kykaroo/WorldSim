@@ -79,7 +79,7 @@ namespace Data
         private void ConstructionTileChanged(Tile tile)
         {
             var baseTile = ScriptableObject.CreateInstance<BaseTile>();
-            baseTile.sprite = _config.constructionConfigs.First(b => b.type == tile.InstalledObject.Type).sprite;
+            baseTile.sprite = tile.InstalledObject == null ? null : _config.constructionConfigs.First(config => config.type == tile.InstalledObject.Type).sprite;
             _worldData.ConstructionTilemap.SetTile(new(tile.X, tile.Y, 0), baseTile);
         }
 

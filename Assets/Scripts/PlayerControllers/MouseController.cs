@@ -79,7 +79,7 @@ namespace PlayerControllers
                     
                     if (TileValidation() && Input.GetKeyDown(KeyCode.Mouse0))
                     {
-                        PlaceTile();
+                        HandleTilePlacement();
                     }
                     break;
                 default:
@@ -87,11 +87,19 @@ namespace PlayerControllers
             }
         }
 
-        private void PlaceTile()
+        private void HandleTilePlacement()
         {
+            if (_config.constructionTileToPlace == ConstructionTileTypes.None)
+            {
+                _tileUnderMouse.InstalledObject?.UninstallObject();
+                return;
+            }
+            
+            InstalledObject installedObject = new(_tilesToPlaceBuilding, _config, _config.constructionTileToPlace);
+            
             foreach (var tile in _tilesToPlaceBuilding)
             {
-                tile.InstalledObject.InstallObject(_config.constructionTileToPlace);
+                tile.InstallBuilding(installedObject);
             }
         }
 
@@ -105,6 +113,15 @@ namespace PlayerControllers
         private bool TileValidation()
         {
             _tilesToPlaceBuilding.Clear();
+            
+            if (_config.constructionTileToPlace == ConstructionTileTypes.None)
+            {
+                var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
+                _tilemap.SetTile(tilePos, _tile);
+                _tilemap.SetTileFlags(tilePos, TileFlags.None);
+                _tilemap.SetColor(tilePos, _invalidColor);
+                return true;
+            }
             
             for (var x = _tileUnderMouse.X; x <= _tileUnderMouse.X + _width - 1; x++)
             {

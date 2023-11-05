@@ -7,7 +7,7 @@ namespace Data
 {
     public class InstalledObject
     {
-        public List<Tile> MainTile;
+        private List<Tile> _tiles;
         public float WalkSpeedMultiplier;
         private ConstructionTileTypes _type;
         private int _width;
@@ -23,23 +23,22 @@ namespace Data
                 var building = _config.constructionConfigs.First(b => b.type == _type);
 
                 WalkSpeedMultiplier = building.moveSpeedMultiplier;
-
-
-                OnTileTypeChanged?.Invoke();
             }
         }
 
-        public event Action OnTileTypeChanged;
-
-        public InstalledObject(Tile mainTile, GenerationConfig config)
+        public InstalledObject(List<Tile> tiles, GenerationConfig config, ConstructionTileTypes type)
         {
+            _tiles = new(tiles);
             _config = config;
-            Type = ConstructionTileTypes.None;
+            Type = type;
         }
 
-        public void InstallObject(ConstructionTileTypes type)
+        public void UninstallObject()
         {
-            Type = type;
+            foreach (var tile in _tiles)
+            {
+                tile.UninstallBuilding();
+            }
         }
     }
 }
