@@ -128,11 +128,11 @@ namespace MapGenerator
                 tileInfoPanel.SetActive(false);
                 return;
             }
-            
+
             tileInfoPanel.SetActive(true);
             tileCoordsText.text = $"X: {tile.X}, Y: {tile.Y}";
             tileWorldTypeText.text = $"Tile world type: {tile.WorldType}";
-            tileConstructionTypeText.text = $"Tile world type: {tile.InstalledObject.Type}";
+            tileConstructionTypeText.text = $"Tile world type: {(tile.InstalledObject == null ? "None" : tile.InstalledObject.Type)}";
             tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
         }
 
