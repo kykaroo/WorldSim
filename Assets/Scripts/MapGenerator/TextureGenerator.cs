@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Data;
-using UnityEngine;
+﻿using UnityEngine;
 using Zenject;
 
 namespace MapGenerator
@@ -34,14 +32,6 @@ namespace MapGenerator
                 colorMap[y * width + x] = Color.Lerp(Color.black, Color.white, heightMap[x, y]);
 
             return TextureFromColourMap(colorMap, width, height);
-        }
-
-        public Texture2D ChangePixel(Texture2D texture, int x, int y, TileWorldType tileWorldType, GenerationConfig config)
-        {
-            texture.SetPixel(x,y, config.regions.First(b => b.tileWorldType == tileWorldType).color);
-            texture.Apply();
-
-            return texture;
         }
     }
 }

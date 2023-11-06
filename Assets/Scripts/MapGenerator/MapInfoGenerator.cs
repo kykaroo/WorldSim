@@ -41,7 +41,7 @@ namespace MapGenerator
                     {   
                         if (!(currentHeight <= region.height)) continue;
 
-                        GenerateTile(x, y, region);
+                        _worldController.CreateTile(x, y, region);
                         break;
                     }
                 }
@@ -50,11 +50,6 @@ namespace MapGenerator
             }
             
             OnMapGenerationComplete?.Invoke();
-        }
-
-        private void GenerateTile(int x, int y, RegionConfig region)
-        {
-            _worldController.CreateTile(x, y, region);
         }
     }
 }

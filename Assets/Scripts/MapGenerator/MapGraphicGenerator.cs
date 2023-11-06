@@ -46,8 +46,7 @@ namespace MapGenerator
                 _config.octaves, _config.persistence, _config.lacunarity, _config.offset);
             
             var colorMap = new Color[_config.mapWidth * _config.mapHeight];
-
-            // Присваивает точке на карте цвет согласно регионам по высоте
+            
             for (var y = 0; y < _config.mapHeight; y++)
             {
                 for (var x = 0; x < _config.mapWidth; x++)

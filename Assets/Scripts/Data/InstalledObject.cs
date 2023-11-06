@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MapGenerator;
 
@@ -7,7 +6,7 @@ namespace Data
 {
     public class InstalledObject
     {
-        private List<Tile> _tiles;
+        private readonly List<Tile> _tiles;
         public float WalkSpeedMultiplier;
         private ConstructionTileTypes _type;
         private int _width;

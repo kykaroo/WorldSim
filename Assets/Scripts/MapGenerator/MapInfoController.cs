@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Data;
-using UnityEngine;
+﻿using Data;
 using Zenject;
 
 namespace MapGenerator
@@ -10,34 +8,24 @@ namespace MapGenerator
         private readonly WorldController _worldController;
         private readonly MapGraphicGenerator _mapGraphicGenerator;
         private readonly MapInfoGenerator _mapInfoGenerator;
-        private readonly MapDisplay _mapDisplay;
-        private readonly TextureGenerator _textureGenerator;
-        private readonly GenerationConfig _config;
-        private Texture2D _texture;
 
         public bool GenerationComplete;
 
         [Inject]
         public MapInfoController(WorldController worldController, MapGraphicGenerator mapGraphicGenerator, 
-            MapInfoGenerator mapInfoGenerator, MapDisplay mapDisplay, TextureGenerator textureGenerator,
-            GenerationConfig config)
+            MapInfoGenerator mapInfoGenerator)
         {
             _worldController = worldController;
             _mapGraphicGenerator = mapGraphicGenerator;
             _mapInfoGenerator = mapInfoGenerator;
-            _mapDisplay = mapDisplay;
-            _textureGenerator = textureGenerator;
-            _config = config;
 
             mapInfoGenerator.OnMapGenerationStart += () => GenerationComplete = false;
             mapInfoGenerator.OnMapGenerationComplete += () => GenerationComplete = true;
-
-            // _worldController.OnTileChanged += ChangePixel;
         }
 
         public void CreateMapGraphic()
         {
-            _texture = _mapGraphicGenerator.GenerateMap();
+            _mapGraphicGenerator.GenerateMap();
         }
         
         public void CreateMapInfo()
@@ -48,12 +36,6 @@ namespace MapGenerator
         public void ClearMap()
         {
             _worldController.ClearAllTiles();
-        }
-
-        private void ChangePixel(Tile tile)
-        {
-            _texture = _textureGenerator.ChangePixel(_texture, tile.X, tile.Y, tile.WorldType, _config);
-            _mapDisplay.DrawTexture(_texture, _config);
         }
     }
 }

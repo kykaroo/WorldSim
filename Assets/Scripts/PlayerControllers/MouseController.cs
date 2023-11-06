@@ -32,18 +32,18 @@ namespace PlayerControllers
         private Tile _selectedTile;
         private int _width;
         private int _height;
-        private List<Tile> _tilesToPlaceBuilding;
+        private readonly List<Tile> _tilesToPlaceBuilding;
 
         public event Action<Tile> OnSelectedTileChanged;
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
-            GenerationConfig config, Tilemap tilemap, Sprite tileSprite)
+            GenerationConfig config, Sprite tileSprite, GraphicsLayers graphicsLayers)
         {
             _worldController = worldController;
             _camera = camera;
             _config = config;
-            _tilemap = tilemap;
+            _tilemap = graphicsLayers.HighLightTilemap;
 
             _tile = ScriptableObject.CreateInstance<BaseTile>();
             _tile.sprite = tileSprite;
@@ -62,7 +62,8 @@ namespace PlayerControllers
                 return;
             }
 
-            GetTileUnderMouse();
+            _tileUnderMouse = _worldController.GetTile(Mathf.FloorToInt(_currentMousePosition.x + TileOffset),
+                Mathf.FloorToInt(_currentMousePosition.y + TileOffset));
 
             HighLightUnderMouse();
 
@@ -153,14 +154,6 @@ namespace PlayerControllers
             return _tilesToPlaceBuilding.Count == _width * _height;
         }
 
-        private void GetTileUnderMouse()
-        {
-            var tileUnderMouse = GetTileAtWorldCoord(_currentMousePosition.x, _currentMousePosition.y);
-            if (_tileUnderMouse == tileUnderMouse) return;
-
-            _tileUnderMouse = tileUnderMouse;
-        }
-
         private void HighLightUnderMouse()
         {
             if (_dragAction) return;
@@ -168,13 +161,12 @@ namespace PlayerControllers
             _tilemap.ClearAllTiles();
             HighlightSelectedTile();
 
-            if (_tileUnderMouse != null)
-            {
-                var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
-                _tilemap.SetTile(tilePos, _tile);
-                _tilemap.SetTileFlags(tilePos, TileFlags.None);
-                _tilemap.SetColor(tilePos, _highlightColor);
-            }
+            if (_tileUnderMouse == null) return;
+            
+            var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
+            _tilemap.SetTile(tilePos, _tile);
+            _tilemap.SetTileFlags(tilePos, TileFlags.None);
+            _tilemap.SetColor(tilePos, _highlightColor);
         }
 
         private void HighlightSelectedTile()
@@ -215,15 +207,14 @@ namespace PlayerControllers
                 DragHighLight(startX, endX, startY, endY);
             }
 
-            if (Input.GetKeyUp(KeyCode.Mouse0))
-            {
-                DragEnd(startX, endX, startY, endY);
+            if (!Input.GetKeyUp(KeyCode.Mouse0)) return;
+            
+            DragEnd(startX, endX, startY, endY);
 
-                if (_isDragAction) return;
+            if (_isDragAction) return;
 
-                _selectedTile = _tileUnderMouse;
-                OnSelectedTileChanged?.Invoke(_selectedTile);
-            }
+            _selectedTile = _tileUnderMouse;
+            OnSelectedTileChanged?.Invoke(_selectedTile);
         }
 
         private void DragEnd(int startX, int endX, int startY, int endY)
@@ -241,7 +232,6 @@ namespace PlayerControllers
                     if (_config.drawMode == DrawMode.NoiseMap) return;
 
                     t.WorldType = _config.worldTileWorldToPlace;
-                    OnSelectedTileChanged?.Invoke(_tileUnderMouse);
                 }
             }
 
@@ -268,11 +258,6 @@ namespace PlayerControllers
                     _tilemap.SetColor(vector3Int, _highlightColor);
                 }
             }
-        }
-
-        private Tile GetTileAtWorldCoord(float x, float y)
-        {
-            return _worldController.GetTile(Mathf.FloorToInt(x + TileOffset), Mathf.FloorToInt(y + TileOffset));
         }
     }
 }

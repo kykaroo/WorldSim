@@ -28,7 +28,7 @@ namespace MapGenerator
         public float WalkSpeedMultiplier { get; private set; }
         
         public bool InstallObjectValid { get; private set; }
-        public LooseObject LooseObject { get; private set; }
+        public TileInventory TileInventory { get; private set; }
 
         public InstalledObject InstalledObject { get; private set; }
 

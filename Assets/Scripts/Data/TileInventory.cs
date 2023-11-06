@@ -1,6 +1,6 @@
 ﻿namespace Data
 {
-    public class LooseObject
+    public class TileInventory
     {
         
     }

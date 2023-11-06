@@ -1,14 +1,10 @@
 ﻿using UnityEngine;
-using Zenject;
 using Random = System.Random;
 
 namespace MapGenerator
 {
     public class Noise
     {
-        [Inject]
-        public Noise() { }
-
         public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed,
             float noiseScale, int octaves, float persistence, float lacunarity,
             Vector2 offset)

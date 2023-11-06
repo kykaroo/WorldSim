@@ -13,10 +13,10 @@ namespace Data
         public readonly Tilemap ConstructionTilemap;
 
         [Inject]
-        public WorldData(Tilemap worldTilemap, Tilemap constructionTilemap)
+        public WorldData(GraphicsLayers layers)
         {
-            WorldTilemap = worldTilemap;
-            ConstructionTilemap = constructionTilemap;
+            WorldTilemap = layers.WorldTilemap;
+            ConstructionTilemap = layers.ConstructionTilemap;
         }
 
         public void Initialize(int width, int height)
