@@ -114,6 +114,8 @@ namespace PlayerControllers
         {
             _tilesToPlaceBuilding.Clear();
             
+            if (_tileUnderMouse == null) return false;
+            
             if (_config.constructionTileToPlace == ConstructionTileTypes.None)
             {
                 var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
@@ -177,14 +179,12 @@ namespace PlayerControllers
 
         private void HighlightSelectedTile()
         {
-            if (_selectedTile != null)
-            {
-                var selectedTilePos = new Vector3Int(_selectedTile.X, _selectedTile.Y, 0);
-                _tilemap.SetTile(selectedTilePos, _tile);
-                _tilemap.SetTileFlags(selectedTilePos, TileFlags.None);
-                _tilemap.SetColor(selectedTilePos, _highlightColor);
-                OnSelectedTileChanged?.Invoke(_selectedTile);
-            }
+            if (_selectedTile == null) return;
+            var selectedTilePos = new Vector3Int(_selectedTile.X, _selectedTile.Y, 0);
+            _tilemap.SetTile(selectedTilePos, _tile);
+            _tilemap.SetTileFlags(selectedTilePos, TileFlags.None);
+            _tilemap.SetColor(selectedTilePos, _highlightColor);
+            OnSelectedTileChanged?.Invoke(_selectedTile);
         }
 
         private void DragMove(Vector3 currentMousePosition)
