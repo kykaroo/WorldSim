@@ -4,7 +4,7 @@ using MapGenerator;
 
 namespace Data
 {
-    public class InstalledObject
+    public class Building
     {
         private readonly List<Tile> _tiles;
         public float WalkSpeedMultiplier;
@@ -25,7 +25,7 @@ namespace Data
             }
         }
 
-        public InstalledObject(List<Tile> tiles, GenerationConfig config, ConstructionTileTypes type)
+        public Building(List<Tile> tiles, GenerationConfig config, ConstructionTileTypes type)
         {
             _tiles = new(tiles);
             _config = config;

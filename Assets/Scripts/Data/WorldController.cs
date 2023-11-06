@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MapGenerator;
 using UnityEngine;
@@ -79,7 +80,7 @@ namespace Data
         private void ConstructionTileChanged(Tile tile)
         {
             var baseTile = ScriptableObject.CreateInstance<BaseTile>();
-            baseTile.sprite = tile.InstalledObject == null ? null : _config.constructionConfigs.First(config => config.type == tile.InstalledObject.Type).sprite;
+            baseTile.sprite = tile.Building == null ? null : _config.constructionConfigs.First(config => config.type == tile.Building.Type).sprite;
             _worldData.ConstructionTilemap.SetTile(new(tile.X, tile.Y, 0), baseTile);
         }
 
@@ -90,6 +91,16 @@ namespace Data
             if (y < 0 || y >= _config.mapHeight) return null;
 
             return (Tile)_worldData.WorldTilemap.GetTile(new(x, y, 0));
+        }
+        
+        public void InstallBuilding(List<Tile> _tilesToPlaceBuilding, ConstructionTileTypes type)
+        {
+            Building building = new(_tilesToPlaceBuilding, _config, type);
+            
+            foreach (var tile in _tilesToPlaceBuilding)
+            {
+                tile.InstallBuilding(building);
+            }
         }
     }
 }

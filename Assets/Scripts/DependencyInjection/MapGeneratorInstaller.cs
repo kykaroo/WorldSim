@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using Ai;
+using Data;
 using MapGenerator;
 using PlayerControllers;
 using UnityEngine;
@@ -35,6 +36,8 @@ namespace DependencyInjection
             Container.BindInterfacesAndSelfTo<GeneratorUi>().FromInstance(generatorUi).AsSingle();
             Container.BindInterfacesAndSelfTo<CameraConfig>().FromNewScriptableObject(cameraConfig).AsSingle();
             Container.Bind<Camera>().FromMethod(b => Instantiate(b.Container.Resolve<CameraConfig>().camera)).AsSingle();
+            
+            Container.BindInterfacesAndSelfTo<Ai.Ai>().AsSingle().NonLazy();
         }
     }
 }

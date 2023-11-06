@@ -27,10 +27,11 @@ namespace MapGenerator
 
         public float WalkSpeedMultiplier { get; private set; }
         
-        public bool InstallObjectValid { get; private set; }
+        public bool BuildingValid { get; private set; }
+        public bool PendingBuildingJob { get; set; }
         public TileInventory TileInventory { get; private set; }
 
-        public InstalledObject InstalledObject { get; private set; }
+        public Building Building { get; private set; }
 
         public event Action<Tile> OnTileTypeChanged;
         public event Action<Tile> OnConstructionTileTypeChanged;
@@ -46,6 +47,7 @@ namespace MapGenerator
             X = x;
             Y = y;
             Config = config;
+            PendingBuildingJob = false;
             
             WorldType = tileWorldType;
             RecalculateSpeed();
@@ -53,20 +55,20 @@ namespace MapGenerator
 
         private void RecalculateSpeed()
         {
-            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * InstalledObject?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
+            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * Building?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
 
-            InstallObjectValid = WalkSpeedMultiplier != 0;
+            BuildingValid = WalkSpeedMultiplier != 0;
         }
         
-        public void InstallBuilding(InstalledObject installedObject)
+        public void InstallBuilding(Building building)
         {
-            InstalledObject = installedObject;
+            Building = building;
             ConstructionTileTypeChanged();
         }
 
         public void UninstallBuilding()
         {
-            InstalledObject = null;
+            Building = null;
             ConstructionTileTypeChanged();
         }
     }

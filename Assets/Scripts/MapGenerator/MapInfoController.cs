@@ -10,7 +10,7 @@ namespace MapGenerator
         private readonly MapInfoGenerator _mapInfoGenerator;
 
         public bool GenerationComplete;
-
+        
         [Inject]
         public MapInfoController(WorldController worldController, MapGraphicGenerator mapGraphicGenerator, 
             MapInfoGenerator mapInfoGenerator)

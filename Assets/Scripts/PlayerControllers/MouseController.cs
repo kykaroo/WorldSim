@@ -92,15 +92,15 @@ namespace PlayerControllers
         {
             if (_config.constructionTileToPlace == ConstructionTileTypes.None)
             {
-                _tileUnderMouse.InstalledObject?.UninstallObject();
+                _tileUnderMouse.Building?.UninstallObject();
                 return;
             }
             
-            InstalledObject installedObject = new(_tilesToPlaceBuilding, _config, _config.constructionTileToPlace);
+            Building building = new(_tilesToPlaceBuilding, _config, _config.constructionTileToPlace);
             
             foreach (var tile in _tilesToPlaceBuilding)
             {
-                tile.InstallBuilding(installedObject);
+                tile.InstallBuilding(building);
             }
         }
 
@@ -137,7 +137,7 @@ namespace PlayerControllers
                     
                     var tilePos = new Vector3Int(tile.X, tile.Y, 0);
 
-                    if (tile.InstallObjectValid)
+                    if (tile.BuildingValid)
                     {
                         _tilemap.SetTile(tilePos, _tile);
                         _tilemap.SetTileFlags(tilePos, TileFlags.None);
