@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: MapGenerationConfig
   m_EditorClassIdentifier: 
   buildMode: 0
-  constructionTileToPlace: 0
+  buildingsTileToPlace: 0
+  worldTileToPlace: 0
+  floorTileWorldToPlace: 0
   drawMode: 1
-  worldTileWorldToPlace: 0
   tileSize: 1
   mapWidth: 100
   mapHeight: 100
@@ -36,7 +37,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dc8750912b423224b92d389bd5d56fa4, type: 2}
   - {fileID: 11400000, guid: 3f0b86cf21fe296449875084bad53520, type: 2}
   - {fileID: 11400000, guid: 445e203c39ede0a4bb5a2ff559d811a5, type: 2}
-  constructionConfigs:
+  buildingConfigs:
   - {fileID: 11400000, guid: 86edc784118fc7a459dfbdc1acc746b4, type: 2}
   - {fileID: 11400000, guid: 784937ab43afa6345b83c4687da0b161, type: 2}
   - {fileID: 11400000, guid: 71d2a761b5a62fe42883caa5928c9b4e, type: 2}
+  floorConfigs:
+  - {fileID: 11400000, guid: 702bbe312434d9b44847f2e3ce50e20e, type: 2}

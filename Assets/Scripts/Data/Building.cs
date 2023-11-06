@@ -8,31 +8,31 @@ namespace Data
     {
         private readonly List<Tile> _tiles;
         public float WalkSpeedMultiplier;
-        private ConstructionTileTypes _type;
+        private BuildingsTileType _type;
         private int _width;
         private int _height;
         private readonly GenerationConfig _config;
         
-        public ConstructionTileTypes Type
+        public BuildingsTileType Type
         {
             get => _type;
             private set
             {
                 _type = value;
-                var building = _config.constructionConfigs.First(b => b.type == _type);
+                var building = _config.buildingConfigs.First(b => b.type == _type);
 
                 WalkSpeedMultiplier = building.moveSpeedMultiplier;
             }
         }
 
-        public Building(List<Tile> tiles, GenerationConfig config, ConstructionTileTypes type)
+        public Building(IEnumerable<Tile> tiles, GenerationConfig config, BuildingsTileType type)
         {
             _tiles = new(tiles);
             _config = config;
             Type = type;
         }
 
-        public void UninstallObject()
+        public void UninstallBuilding()
         {
             foreach (var tile in _tiles)
             {

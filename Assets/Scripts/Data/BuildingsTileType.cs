@@ -1,6 +1,6 @@
 ﻿namespace Data
 {
-    public enum ConstructionTileTypes
+    public enum BuildingsTileType
     {
         None,
         Wall,

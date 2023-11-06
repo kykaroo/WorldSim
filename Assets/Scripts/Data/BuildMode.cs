@@ -3,6 +3,7 @@
     public enum BuildMode
     {
         World,
-        Construction
+        Building,
+        Floor
     }
 }

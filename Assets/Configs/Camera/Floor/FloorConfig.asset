@@ -9,12 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84f85cb3bdff4571aefc24c9ca40a8f1, type: 3}
-  m_Name: Grass
+  m_Script: {fileID: 11500000, guid: e4e20d30c31442dcb9c79c6fd4eecafd, type: 3}
+  m_Name: FloorConfig
   m_EditorClassIdentifier: 
-  Name: Grass
-  height: 0.5
-  worldTileType: 3
-  moveSpeedMultiplier: 1
-  tileSprite: {fileID: 21300000, guid: 532a43d07729b814c92b7d02ba7231ec, type: 3}
-  color: {r: 0.1827594, g: 1, b: 0, a: 1}
+  Name: Wood
+  type: 1
+  sprite: {fileID: 21300000, guid: 4e0f39b46babff14f96be08b3801ff18, type: 3}
+  moveSpeedMultiplier: 1.2

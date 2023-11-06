@@ -8,7 +8,7 @@ namespace MapGenerator
     {
         public string Name;
         public float height;
-        public TileWorldType tileWorldType;
+        public WorldTileType worldTileType;
         public float moveSpeedMultiplier;
         public Sprite tileSprite;
         public Color color;

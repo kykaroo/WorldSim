@@ -5,39 +5,36 @@ using MapGenerator;
 
 namespace Ai
 {
-    public class Job
+    public class FloorJob : IJob
     {
         private readonly WorldController _worldController;
         private float _jobTime;
-
         public float TotalJob { get; }
         public List<Tile> Tiles { get; }
-        public ConstructionTileTypes Building { get; }
-        public float BuildingProgress { get; private set; }
-
-        public event Action<Job> OnJobComplete;
-        public event Action<Job> OnJobCancel;
-
-        public Job(IEnumerable<Tile> tiles, ConstructionTileTypes building, float totalJob, WorldController worldController)
+        public FloorTileType Floor { get; }
+        public float ConstructionProgress { get; set; }
+        public event Action<IJob> OnJobComplete;
+        public event Action<IJob> OnJobCancel;
+        
+        public FloorJob(List<Tile> tiles, FloorTileType floor, float totalJob, WorldController worldController)
         {
-            Tiles = new(tiles);
+            Tiles = tiles;
             TotalJob = totalJob;
-            Building = building;
+            Floor = floor;
             _worldController = worldController;
         }
-
+        
         public bool DoWork(float workTime)
         {
             _jobTime += workTime;
-            BuildingProgress = _jobTime / TotalJob;
-            _worldController.UpdateConstructionProgress(this);
+            ConstructionProgress = _jobTime / TotalJob;
+            _worldController.UpdateFloorConstructionProgress(this);
 
             if (!(_jobTime >= TotalJob)) return false;
 
-            BuildingProgress = 1;
+            ConstructionProgress = 1;
             OnJobComplete?.Invoke(this);
             return true;
-
         }
 
         public void CancelJob()

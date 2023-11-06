@@ -33,10 +33,12 @@ namespace MapGenerator
         [SerializeField] private TMP_Dropdown worldTileType;
         [SerializeField] private TMP_Dropdown buildMode;
         [SerializeField] private TMP_Dropdown constructionTileType;
+        [SerializeField] private TMP_Dropdown floorTileType;
         [SerializeField] private GameObject tileInfoPanel;
         [SerializeField] private TextMeshProUGUI tileCoordsText;
         [SerializeField] private TextMeshProUGUI tileWorldTypeText;
         [SerializeField] private TextMeshProUGUI tileConstructionTypeText;
+        [SerializeField] private TextMeshProUGUI tileFloorTypeText;
         [SerializeField] private TextMeshProUGUI tileWalkSpeedText;
 
         private GenerationConfig _config;
@@ -83,8 +85,9 @@ namespace MapGenerator
 
             tileInfoPanel.SetActive(true);
             tileCoordsText.text = $"X: {tile.X}, Y: {tile.Y}";
-            tileWorldTypeText.text = $"Tile world type: {tile.WorldType}";
-            tileConstructionTypeText.text = $"Tile world type: {(tile.Building == null ? "None" : tile.Building.Type)}";
+            tileWorldTypeText.text = $"Tile world type: {tile.Type}";
+            tileConstructionTypeText.text = $"Tile building type: {(tile.Building == null ? "None" : tile.Building.Type)}";
+            tileFloorTypeText.text = $"Tile floor type: {(tile.Floor == null ? "None" : tile.Floor.Type)}";
             tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
         }
 
@@ -119,7 +122,8 @@ namespace MapGenerator
             var buildModeList = new List<string>
             {
                 "World",
-                "Construction"
+                "Building",
+                "Floor"
             };
             
             var constructionTileTypeList = new List<string>
@@ -129,15 +133,23 @@ namespace MapGenerator
                 "Statue"
             };
             
+            var floorTileTypeList = new List<string>
+            {
+                "None",
+                "Wood"
+            };
+            
             drawMode.ClearOptions();
             worldTileType.ClearOptions();
             buildMode.ClearOptions();
             constructionTileType.ClearOptions();
+            floorTileType.ClearOptions();
             
             drawMode.AddOptions(drawModeList);
             worldTileType.AddOptions(worldTileTypeList);
             buildMode.AddOptions(buildModeList);
             constructionTileType.AddOptions(constructionTileTypeList);
+            floorTileType.AddOptions(floorTileTypeList);
             
             parametersPanel.SetActive(false);
             
@@ -169,6 +181,7 @@ namespace MapGenerator
             worldTileType.onValueChanged.AddListener(ChangeWorldTileType);
             buildMode.onValueChanged.AddListener(ChangeBuildMode);
             constructionTileType.onValueChanged.AddListener(ChangeConstructionTileType);
+            floorTileType.onValueChanged.AddListener(ChangeFloorTileType);
             mapWidth.onValueChanged.AddListener(width => _config.mapWidth = int.Parse(width));
             mapHeight.onValueChanged.AddListener(height => _config.mapHeight = int.Parse(height));
             levelOfDetail.onValueChanged.AddListener(detailLevel => _config.levelOfDetail = int.Parse(detailLevel));
@@ -184,6 +197,18 @@ namespace MapGenerator
             instantBuild.onValueChanged.AddListener(ToggleInstantBuild);
         }
 
+        private void ChangeFloorTileType(int arg0)
+        {
+            _config.floorTileWorldToPlace = arg0 switch
+            {
+                0 => FloorTileType.None,
+                1 => FloorTileType.Wood,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            
+            _mouseController.FloorTileTypeChange();
+        }
+
         private void ToggleInstantBuild(bool arg0)
         {
             _mouseController.IsInstantBuild = arg0;
@@ -194,18 +219,19 @@ namespace MapGenerator
             _config.buildMode = arg0 switch
             {
                 0 => BuildMode.World,
-                1 => BuildMode.Construction,
+                1 => BuildMode.Building,
+                2 => BuildMode.Floor,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
         private void ChangeConstructionTileType(int arg0)
         {
-            _config.constructionTileToPlace = arg0 switch
+            _config.buildingsTileToPlace = arg0 switch
             {
-                0 => ConstructionTileTypes.None,
-                1 => ConstructionTileTypes.Wall,
-                2 => ConstructionTileTypes.Statue,
+                0 => BuildingsTileType.None,
+                1 => BuildingsTileType.Wall,
+                2 => BuildingsTileType.Statue,
                 _ => throw new ArgumentOutOfRangeException()
             };
             
@@ -214,15 +240,15 @@ namespace MapGenerator
 
         private void ChangeWorldTileType(int arg0)
         {
-            _config.worldTileWorldToPlace = arg0 switch
+            _config.worldTileToPlace = arg0 switch
             {
-                0 => TileWorldType.None,
-                1 => TileWorldType.Water,
-                2 => TileWorldType.Sand,
-                3 => TileWorldType.Grass,
-                4 => TileWorldType.Rocks,
-                5 => TileWorldType.Mountain,
-                6 => TileWorldType.Summit,
+                0 => WorldTileType.None,
+                1 => WorldTileType.Water,
+                2 => WorldTileType.Sand,
+                3 => WorldTileType.Grass,
+                4 => WorldTileType.Rocks,
+                5 => WorldTileType.Mountain,
+                6 => WorldTileType.Summit,
                 _ => throw new ArgumentException()
             };
         }

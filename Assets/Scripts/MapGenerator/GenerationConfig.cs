@@ -8,9 +8,10 @@ namespace MapGenerator
     public class GenerationConfig : ScriptableObject
     {
         public BuildMode buildMode;
-        public ConstructionTileTypes constructionTileToPlace;
+        public BuildingsTileType buildingsTileToPlace;
+        public WorldTileType worldTileToPlace;
+        public FloorTileType floorTileWorldToPlace;
         public DrawMode drawMode;
-        public TileWorldType worldTileWorldToPlace;
         public int tileSize;
 
         public int mapWidth;
@@ -32,7 +33,8 @@ namespace MapGenerator
         public bool instantBuild;
 
         public RegionConfig[] regions;
-        public ConstructionConfig[] constructionConfigs;
+        public BuildingConfig[] buildingConfigs;
+        public FloorConfig[] floorConfigs;
 
         public IOrderedEnumerable<RegionConfig> OrderedRegions;
     }

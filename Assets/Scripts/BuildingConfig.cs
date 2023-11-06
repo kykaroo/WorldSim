@@ -1,11 +1,11 @@
 ﻿using Data;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "TileConfig/ConstructionConfig", fileName = "Construction Config")]
-public class ConstructionConfig : ScriptableObject
+[CreateAssetMenu(menuName = "TileConfig/BuildingConfig", fileName = "Building Config")]
+public class BuildingConfig : ScriptableObject
 {
     public string Name;
-    public ConstructionTileTypes type;
+    public BuildingsTileType type;
     public Sprite sprite;
     public Color color;
     public float moveSpeedMultiplier;

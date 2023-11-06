@@ -46,7 +46,7 @@ namespace Data
 
         private void TileChanged(Tile tile)
         {
-            _worldData.WorldTilemap.SetColor(new(tile.X, tile.Y, 0), _config.regions.First(b => b.tileWorldType == tile.WorldType).color);
+            _worldData.WorldTilemap.SetColor(new(tile.X, tile.Y, 0), _config.regions.First(b => b.worldTileType == tile.Type).color);
         }
 
         public void ClearAllTiles()
@@ -56,7 +56,7 @@ namespace Data
             foreach (var tile in _worldData.Tiles)
             {
                 tile.OnTileTypeChanged -= TileChanged;
-                tile.OnConstructionTileTypeChanged -= ConstructionTileChanged;
+                tile.OnBuildingTileTypeChanged -= BuildingTileChanged;
             }
 
             _worldData.WorldTilemap.ClearAllTiles(); 
@@ -67,10 +67,11 @@ namespace Data
         {
             var tile = ScriptableObject.CreateInstance<Tile>();
             var tilePos = new Vector3Int(x,y,0);
-            tile.Initialize(x, y, region.tileWorldType, _config);
+            tile.Initialize(x, y, region.worldTileType, _config);
             tile.sprite = region.tileSprite;
             tile.OnTileTypeChanged += TileChanged;
-            tile.OnConstructionTileTypeChanged += ConstructionTileChanged;
+            tile.OnBuildingTileTypeChanged += BuildingTileChanged;
+            tile.OnFloorTileTypeChanged += FloorTileChanged;
             
             _worldData.WorldTilemap.SetTile(tilePos, tile);
             _worldData.WorldTilemap.SetTileFlags(tilePos, TileFlags.None);
@@ -78,12 +79,21 @@ namespace Data
             _worldData.WorldTilemap.SetColor(tilePos, region.color);
         }
 
-        private void ConstructionTileChanged(Tile tile)
+        private void FloorTileChanged(Tile tile)
         {
             var baseTile = ScriptableObject.CreateInstance<BaseTile>();
             var tileChangeData = new Vector3Int(tile.X, tile.Y, 0);
             
-            baseTile.sprite = tile.Building == null ? null : _config.constructionConfigs.First(config => config.type == tile.Building.Type).sprite;
+            baseTile.sprite = tile.Floor == null ? null : _config.floorConfigs.First(config => config.type == tile.Floor.Type).sprite;
+            _worldData.FloorTilemap.SetTile(tileChangeData, baseTile);
+        }
+
+        private void BuildingTileChanged(Tile tile)
+        {
+            var baseTile = ScriptableObject.CreateInstance<BaseTile>();
+            var tileChangeData = new Vector3Int(tile.X, tile.Y, 0);
+            
+            baseTile.sprite = tile.Building == null ? null : _config.buildingConfigs.First(config => config.type == tile.Building.Type).sprite;
             _worldData.ConstructionTilemap.SetTile(tileChangeData, baseTile);
             _worldData.ConstructionTilemap.SetTileFlags(tileChangeData, TileFlags.None);
             _worldData.ConstructionTilemap.SetColor(tileChangeData, new(1, 1, 1, 0));
@@ -98,7 +108,7 @@ namespace Data
             return (Tile)_worldData.WorldTilemap.GetTile(new(x, y, 0));
         }
         
-        public void InstallBuilding(List<Tile> tilesToPlaceBuilding, ConstructionTileTypes type)
+        public void InstallBuilding(List<Tile> tilesToPlaceBuilding, BuildingsTileType type)
         {
             Building building = new(tilesToPlaceBuilding, _config, type);
             
@@ -109,11 +119,28 @@ namespace Data
         }
         
 
-        public void UpdateConstructionProgress(Job job)
+        public void UpdateBuildingConstructionProgress(BuildingJob buildingJob)
         {
-            foreach (var tile in job.Tiles)
+            foreach (var tile in buildingJob.Tiles)
             {
-                _worldData.ConstructionTilemap.SetColor(new(tile.X, tile.Y, 0), new(1, 1, 1, job.BuildingProgress));
+                _worldData.ConstructionTilemap.SetColor(new(tile.X, tile.Y, 0),
+                    new(1, 1, 1, buildingJob.ConstructionProgress));
+            }
+        }
+
+        public void InstallFloor(Tile tile, FloorTileType type)
+        {
+            Floor floor = new(tile, _config, type);
+            
+            tile.InstallFloor(floor);
+        }
+        
+        public void UpdateFloorConstructionProgress(FloorJob buildingJob)
+        {
+            foreach (var tile in buildingJob.Tiles)
+            {
+                _worldData.FloorTilemap.SetColor(new(tile.X, tile.Y, 0), 
+                    new(1, 1, 1, buildingJob.ConstructionProgress));
             }
         }
     }

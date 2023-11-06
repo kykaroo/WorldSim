@@ -9,7 +9,7 @@ namespace Ai
 {
     public class Ai : ITickable, IFixedTickable
     {
-        private readonly List<Job> _jobList;
+        private readonly List<IJob> _jobList;
         private readonly GenerationConfig _config;
         private readonly WorldController _worldController;
         private readonly List<Tile> _tilesToPlaceBuilding;
@@ -30,7 +30,7 @@ namespace Ai
             _timer = Time;
         }
 
-        private void PlaceTile()
+        private void PlaceBuilding()
         {
             if (!CheckValidation()) return;
 
@@ -39,7 +39,7 @@ namespace Ai
                 tile.PendingBuildingJob = true;
             }
             
-            var job = new Job(_tilesToPlaceBuilding, ConstructionTileTypes.Statue, 5f, _worldController);
+            var job = new BuildingJob(_tilesToPlaceBuilding, BuildingsTileType.Statue, 5f, _worldController);
             job.OnJobComplete += job1 => _jobList.Remove(job1);
             _worldController.InstallBuilding(job.Tiles, job.Building);
             _jobList.Add(job);
@@ -47,7 +47,7 @@ namespace Ai
 
         private bool CheckValidation()
         {
-            var building = _config.constructionConfigs.First(b => b.type == ConstructionTileTypes.Statue);
+            var building = _config.buildingConfigs.First(b => b.type == BuildingsTileType.Statue);
             var width = building.width;
             var height = building.height;
 
@@ -91,7 +91,7 @@ namespace Ai
             
             if (_timer >= 0) return;
             _timer = Time;
-            PlaceTile();
+            PlaceBuilding();
         }
 
         public void FixedTick()

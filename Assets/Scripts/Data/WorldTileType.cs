@@ -1,6 +1,6 @@
 ﻿namespace Data
 {
-    public enum TileWorldType
+    public enum WorldTileType
     {
         None,
         Water,
