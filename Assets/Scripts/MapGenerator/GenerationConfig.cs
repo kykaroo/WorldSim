@@ -28,6 +28,8 @@ namespace MapGenerator
         public Vector2 offset;
 
         public bool autoUpdate;
+        public float buildTime;
+        public bool instantBuild;
 
         public RegionConfig[] regions;
         public ConstructionConfig[] constructionConfigs;

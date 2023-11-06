@@ -26,7 +26,9 @@ namespace MapGenerator
         [SerializeField] private TMP_InputField seed;
         [SerializeField] private TMP_InputField offsetX;
         [SerializeField] private TMP_InputField offsetY;
+        [SerializeField] private TMP_InputField buildTime;
         [SerializeField] private Toggle autoUpdate;
+        [SerializeField] private Toggle instantBuild;
         [SerializeField] private GameObject parametersPanel;
         [SerializeField] private TMP_Dropdown worldTileType;
         [SerializeField] private TMP_Dropdown buildMode;
@@ -53,7 +55,41 @@ namespace MapGenerator
             _mouseController = mouseController;
             tileInfoPanel.SetActive(false);
             _mouseController.OnSelectedTileChanged += UpdateTileInfo;
+
+            InitializeValues();
             
+            if (_isAutoUpdate)
+            {
+                AutoUpdateSubscriptions();
+            }
+
+            _mouseController.IsInstantBuild = config.instantBuild;
+            
+            AddSubscriptions();
+            
+            GenerateMapPreview();
+            GenerateMap();
+        }
+
+        private void UpdateTileInfo(Tile tile)
+        {
+            if (!_mapInfoController.GenerationComplete) return;
+            
+            if (tile == null)
+            {
+                tileInfoPanel.SetActive(false);
+                return;
+            }
+
+            tileInfoPanel.SetActive(true);
+            tileCoordsText.text = $"X: {tile.X}, Y: {tile.Y}";
+            tileWorldTypeText.text = $"Tile world type: {tile.WorldType}";
+            tileConstructionTypeText.text = $"Tile world type: {(tile.Building == null ? "None" : tile.Building.Type)}";
+            tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
+        }
+
+        private void InitializeValues()
+        {
             _drawModeIds = new()
             {
                 { DrawMode.NoiseMap, 0 },
@@ -93,7 +129,6 @@ namespace MapGenerator
                 "Statue"
             };
             
-            
             drawMode.ClearOptions();
             worldTileType.ClearOptions();
             buildMode.ClearOptions();
@@ -103,41 +138,9 @@ namespace MapGenerator
             worldTileType.AddOptions(worldTileTypeList);
             buildMode.AddOptions(buildModeList);
             constructionTileType.AddOptions(constructionTileTypeList);
-
+            
             parametersPanel.SetActive(false);
-
-            InitializeValues();
             
-            if (_isAutoUpdate)
-            {
-                AutoUpdateSubscriptions();
-            }
-            
-            AddSubscriptions();
-            
-            GenerateMapPreview();
-            GenerateMap();
-        }
-
-        private void UpdateTileInfo(Tile tile)
-        {
-            if (!_mapInfoController.GenerationComplete) return;
-            
-            if (tile == null)
-            {
-                tileInfoPanel.SetActive(false);
-                return;
-            }
-
-            tileInfoPanel.SetActive(true);
-            tileCoordsText.text = $"X: {tile.X}, Y: {tile.Y}";
-            tileWorldTypeText.text = $"Tile world type: {tile.WorldType}";
-            tileConstructionTypeText.text = $"Tile world type: {(tile.Building == null ? "None" : tile.Building.Type)}";
-            tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
-        }
-
-        private void InitializeValues()
-        {
             _drawModeIds.TryGetValue(_config.drawMode,out var drawModeId);
             
             drawMode.value = drawModeId;
@@ -151,8 +154,10 @@ namespace MapGenerator
             seed.text = _config.seed.ToString();
             offsetX.text = _config.offset.y.ToString();
             offsetY.text = _config.offset.y.ToString();
+            buildTime.text = _config.buildTime.ToString();
             _isAutoUpdate = _config.autoUpdate;
             autoUpdate.isOn = _config.autoUpdate;
+            instantBuild.isOn = _config.autoUpdate;
         }
 
         private void AddSubscriptions()
@@ -164,17 +169,24 @@ namespace MapGenerator
             worldTileType.onValueChanged.AddListener(ChangeWorldTileType);
             buildMode.onValueChanged.AddListener(ChangeBuildMode);
             constructionTileType.onValueChanged.AddListener(ChangeConstructionTileType);
-            mapWidth.onValueChanged.AddListener(b => _config.mapWidth = int.Parse(b));
-            mapHeight.onValueChanged.AddListener(b => _config.mapHeight = int.Parse(b));
-            levelOfDetail.onValueChanged.AddListener(b => _config.levelOfDetail = int.Parse(b));
-            noiseScale.onValueChanged.AddListener(b => _config.noiseScale = int.Parse(b));
-            octaves.onValueChanged.AddListener(b => _config.octaves = int.Parse(b));
-            persistence.onValueChanged.AddListener(b => _config.persistence = int.Parse(b));
-            lacunarity.onValueChanged.AddListener(b => _config.lacunarity = int.Parse(b));
-            seed.onValueChanged.AddListener(b => _config.seed = int.Parse(b));
-            offsetX.onValueChanged.AddListener(b => _config.offset.x = int.Parse(b));
-            offsetY.onValueChanged.AddListener(b => _config.offset.y = int.Parse(b));
+            mapWidth.onValueChanged.AddListener(width => _config.mapWidth = int.Parse(width));
+            mapHeight.onValueChanged.AddListener(height => _config.mapHeight = int.Parse(height));
+            levelOfDetail.onValueChanged.AddListener(detailLevel => _config.levelOfDetail = int.Parse(detailLevel));
+            noiseScale.onValueChanged.AddListener(scale => _config.noiseScale = int.Parse(scale));
+            octaves.onValueChanged.AddListener(octave => _config.octaves = int.Parse(octave));
+            persistence.onValueChanged.AddListener(persis => _config.persistence = int.Parse(persis));
+            lacunarity.onValueChanged.AddListener(lacun => _config.lacunarity = int.Parse(lacun));
+            seed.onValueChanged.AddListener(generationSeed => _config.seed = int.Parse(generationSeed));
+            offsetX.onValueChanged.AddListener(xOffset => _config.offset.x = int.Parse(xOffset));
+            offsetY.onValueChanged.AddListener(yOffset => _config.offset.y = int.Parse(yOffset));
+            buildTime.onValueChanged.AddListener(timeToBuild => _config.buildTime = int.Parse(timeToBuild));
             autoUpdate.onValueChanged.AddListener(ToggleAutoUpdate);
+            instantBuild.onValueChanged.AddListener(ToggleInstantBuild);
+        }
+
+        private void ToggleInstantBuild(bool arg0)
+        {
+            _mouseController.IsInstantBuild = arg0;
         }
 
         private void ChangeBuildMode(int arg0)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ai;
 using Data;
 using MapGenerator;
 using UnityEngine;
@@ -11,12 +12,14 @@ using Tile = MapGenerator.Tile;
 
 namespace PlayerControllers
 {
-    public class MouseController : ITickable
+    public class MouseController : ITickable, IFixedTickable
     {
         private readonly WorldController _worldController;
         private readonly Camera _camera;
         private readonly GenerationConfig _config;
         private readonly Tilemap _tilemap;
+        private readonly List<Tile> _tilesToPlaceBuilding;
+        private readonly List<Job> _jobList;
 
         private Vector3 _dragStart;
         private Transform _highLightParent;
@@ -32,9 +35,9 @@ namespace PlayerControllers
         private Tile _selectedTile;
         private int _width;
         private int _height;
-        private readonly List<Tile> _tilesToPlaceBuilding;
 
         public event Action<Tile> OnSelectedTileChanged;
+        public bool IsInstantBuild;
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
@@ -44,6 +47,7 @@ namespace PlayerControllers
             _camera = camera;
             _config = config;
             _tilemap = graphicsLayers.HighLightTilemap;
+            _jobList = new();
 
             _tile = ScriptableObject.CreateInstance<BaseTile>();
             _tile.sprite = tileSprite;
@@ -88,6 +92,23 @@ namespace PlayerControllers
             }
         }
 
+        private void DoJobs()
+        {
+            foreach (var job in _jobList)
+            {
+                if (IsInstantBuild)
+                {
+                    job.DoWork(job.TotalJob);
+                    break;
+                }
+                
+                if (job.DoWork(Time.fixedDeltaTime))
+                {
+                    break;
+                }
+            }
+        }
+
         private void HandleTilePlacement()
         {
             if (_config.constructionTileToPlace == ConstructionTileTypes.None)
@@ -96,12 +117,10 @@ namespace PlayerControllers
                 return;
             }
             
-            Building building = new(_tilesToPlaceBuilding, _config, _config.constructionTileToPlace);
-            
-            foreach (var tile in _tilesToPlaceBuilding)
-            {
-                tile.InstallBuilding(building);
-            }
+            var job = new Job(_tilesToPlaceBuilding, ConstructionTileTypes.Statue, _config.buildTime, _worldController);
+            job.OnJobComplete += job1 => _jobList.Remove(job1);
+            _worldController.InstallBuilding(job.Tiles, job.Building);
+            _jobList.Add(job);
         }
 
         public void ConstructionTileTypeChange()
@@ -258,6 +277,11 @@ namespace PlayerControllers
                     _tilemap.SetColor(vector3Int, _highlightColor);
                 }
             }
+        }
+
+        public void FixedTick()
+        {
+            DoJobs();
         }
     }
 }

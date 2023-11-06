@@ -7,15 +7,18 @@ using Tile = MapGenerator.Tile;
 
 namespace Ai
 {
-    public class Ai : ITickable
+    public class Ai : ITickable, IFixedTickable
     {
         private readonly List<Job> _jobList;
         private readonly GenerationConfig _config;
         private readonly WorldController _worldController;
         private readonly List<Tile> _tilesToPlaceBuilding;
+        
+        private const int XCord = 50;
+        private const int YCord = 50;
+        private const float Time = 4;
 
         private float _timer;
-        private const float Time = 4;
 
         [Inject]
         public Ai(GenerationConfig config, WorldController worldController)
@@ -36,21 +39,14 @@ namespace Ai
                 tile.PendingBuildingJob = true;
             }
             
-            var job = new Job(_tilesToPlaceBuilding, ConstructionTileTypes.Statue, 2f);
-            job.OnJobComplete += CompleteJob;
-            _jobList.Add(job);
-        }
-
-        private void CompleteJob(Job job)
-        {
+            var job = new Job(_tilesToPlaceBuilding, ConstructionTileTypes.Statue, 5f, _worldController);
+            job.OnJobComplete += job1 => _jobList.Remove(job1);
             _worldController.InstallBuilding(job.Tiles, job.Building);
-            _jobList.Remove(job);
+            _jobList.Add(job);
         }
 
         private bool CheckValidation()
         {
-            var xCord = 50;
-            var yCord = 50;
             var building = _config.constructionConfigs.First(b => b.type == ConstructionTileTypes.Statue);
             var width = building.width;
             var height = building.height;
@@ -59,10 +55,10 @@ namespace Ai
             {
                 for (var y = 0; y < 3; y++)
                 {
-                    if (TileValidation(xCord - x, yCord - y, width, height)) return true;
-                    if (TileValidation(xCord - x, yCord - y, height, width)) return true;
-                    if (TileValidation(xCord + x, yCord + y, width, height)) return true;
-                    if (TileValidation(xCord + x, yCord + y, height, width)) return true;
+                    if (TileValidation(XCord - x, YCord - y, width, height)) return true;
+                    if (TileValidation(XCord - x, YCord - y, height, width)) return true;
+                    if (TileValidation(XCord + x, YCord + y, width, height)) return true;
+                    if (TileValidation(XCord + x, YCord + y, height, width)) return true;
                 }
             }
 
@@ -91,6 +87,15 @@ namespace Ai
 
         public void Tick()
         {
+            _timer -= UnityEngine.Time.deltaTime;
+            
+            if (_timer >= 0) return;
+            _timer = Time;
+            PlaceTile();
+        }
+
+        public void FixedTick()
+        {
             foreach (var job in _jobList)
             {
                 if (job.DoWork(UnityEngine.Time.fixedDeltaTime))
@@ -98,12 +103,6 @@ namespace Ai
                     break;
                 }
             }
-            
-            _timer -= UnityEngine.Time.deltaTime;
-            
-            if (_timer >= 0) return;
-            _timer = Time;
-            PlaceTile();
         }
     }
 }
