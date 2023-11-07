@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Ai;
 using Data;
 
 namespace MapGenerator
@@ -29,8 +30,11 @@ namespace MapGenerator
         
         public bool BuildingValid { get; private set; }
         public bool PendingBuildingJob { get; set; }
+        public bool PendingFloorJob { get; set; }
+        public bool BuildingComplete { get; set; }
         public bool FloorValid { get; set; }
         public Floor Floor { get; set; }
+        public Pawn Pawn { get; set; }
         public TileInventory TileInventory { get; private set; }
 
         public Building Building { get; private set; }
@@ -57,6 +61,7 @@ namespace MapGenerator
             Y = y;
             Config = config;
             PendingBuildingJob = false;
+            PendingFloorJob = false;
             
             Type = worldTileType;
             RecalculateSpeed();
@@ -64,16 +69,16 @@ namespace MapGenerator
 
         private void RecalculateSpeed()
         {
-            if (Floor != null && Building == null)
+            if (Building != null && BuildingComplete)
             {
-                WalkSpeedMultiplier = Floor.WalkSpeedMultiplier;
+                WalkSpeedMultiplier = _tileWalkSpeedMultiplier * Building.WalkSpeedMultiplier;
                 return;
             }
-            
-            WalkSpeedMultiplier = _tileWalkSpeedMultiplier * Building?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
 
-            BuildingValid = WalkSpeedMultiplier != 0;
-            FloorValid = _tileWalkSpeedMultiplier != 0;
+            WalkSpeedMultiplier = Floor?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
+
+            BuildingValid = WalkSpeedMultiplier != 0 && Building == null;
+            FloorValid = _tileWalkSpeedMultiplier != 0 && Floor == null;
         }
         
         public void InstallBuilding(Building building)
@@ -98,6 +103,12 @@ namespace MapGenerator
         {
             Floor = null;
             FloorTileTypeChanged();
+        }
+
+        public bool IsNeighbour(Tile tile)
+        {
+            if (tile.X >= X + 1 || tile.X >= X - 1) return false;
+            return tile.Y < Y + 1 && tile.Y < Y - 1;
         }
     }
 }

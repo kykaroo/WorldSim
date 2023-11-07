@@ -7,27 +7,41 @@ using Tile = MapGenerator.Tile;
 
 namespace Ai
 {
-    public class Ai : ITickable, IFixedTickable
+    public class Ai : IFixedTickable
     {
         private readonly List<IJob> _jobList;
         private readonly GenerationConfig _config;
         private readonly WorldController _worldController;
         private readonly List<Tile> _tilesToPlaceBuilding;
+        private readonly TurnManager _turnManager;
         
         private const int XCord = 50;
         private const int YCord = 50;
         private const float Time = 4;
 
+        private readonly List<Pawn> _characters;
         private float _timer;
 
         [Inject]
-        public Ai(GenerationConfig config, WorldController worldController)
+        public Ai(GenerationConfig config, WorldController worldController, TurnManager turnManager)
         {
             _jobList = new();
             _tilesToPlaceBuilding = new();
+            _characters = new();
+            
             _config = config;
             _worldController = worldController;
             _timer = Time;
+            _turnManager = turnManager;
+            _turnManager.OnTurnTrigger += CharactersUpdate;
+        }
+
+        private void CharactersUpdate()
+        {
+            foreach (var character in _characters)
+            {
+                character.Update();
+            }
         }
 
         private void PlaceBuilding()
@@ -38,10 +52,11 @@ namespace Ai
             {
                 tile.PendingBuildingJob = true;
             }
+
+            var building = new Building(_tilesToPlaceBuilding, _config, BuildingsTileType.Statue);
             
-            var job = new BuildingJob(_tilesToPlaceBuilding, BuildingsTileType.Statue, 5f, _worldController);
+            var job = new BuildingJob(building, 5f, _worldController);
             job.OnJobComplete += job1 => _jobList.Remove(job1);
-            _worldController.InstallBuilding(job.Tiles, job.Building);
             _jobList.Add(job);
         }
 
@@ -85,24 +100,19 @@ namespace Ai
             return _tilesToPlaceBuilding.Count == width * height;
         }
 
-        public void Tick()
+        public void CreatePop()
+        {
+            var character = new Pawn(_worldController.GetTile(50, 50), 1, _jobList);
+            _characters.Add(character);
+        }
+
+        public void FixedTick()
         {
             _timer -= UnityEngine.Time.deltaTime;
             
             if (_timer >= 0) return;
             _timer = Time;
             PlaceBuilding();
-        }
-
-        public void FixedTick()
-        {
-            foreach (var job in _jobList)
-            {
-                if (job.DoWork(UnityEngine.Time.fixedDeltaTime))
-                {
-                    break;
-                }
-            }
         }
     }
 }

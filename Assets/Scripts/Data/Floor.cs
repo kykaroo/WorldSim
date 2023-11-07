@@ -1,11 +1,12 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using MapGenerator;
 
 namespace Data
 {
     public class Floor
     {
-        private readonly Tile _tile;
+        public readonly List<Tile> Tiles;
         public float WalkSpeedMultiplier;
         private FloorTileType _type;
         private readonly GenerationConfig _config;
@@ -22,16 +23,19 @@ namespace Data
             }
         }
 
-        public Floor(Tile tile, GenerationConfig config, FloorTileType type)
+        public Floor(IEnumerable<Tile> tiles, GenerationConfig config, FloorTileType type)
         {
-            _tile = tile;
+            Tiles = new(tiles);
             _config = config;
             Type = type;
         }
 
         public void UninstallFloor()
         {
-            _tile.UninstallFloor();
+            foreach (var tile in Tiles)
+            {
+                tile.UninstallFloor();
+            }
         }
     }
 }

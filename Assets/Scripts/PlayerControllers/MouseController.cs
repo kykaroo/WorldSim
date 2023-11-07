@@ -12,7 +12,7 @@ using Tile = MapGenerator.Tile;
 
 namespace PlayerControllers
 {
-    public class MouseController : ITickable, IFixedTickable
+    public class MouseController : ITickable
     {
         private readonly WorldController _worldController;
         private readonly Camera _camera;
@@ -20,6 +20,8 @@ namespace PlayerControllers
         private readonly Tilemap _highlightTilemap;
         private readonly List<Tile> _tilesToPlaceBuilding;
         private readonly List<IJob> _jobList;
+        private readonly List<Pawn> _characters;
+        private readonly TurnManager _turnManager;
 
         private Vector3 _dragStart;
         private Transform _highLightParent;
@@ -36,18 +38,23 @@ namespace PlayerControllers
         private int _width;
         private int _height;
 
-        public event Action<Tile> OnSelectedTileChanged;
         public bool IsInstantBuild;
+        
+        public event Action<Tile> OnSelectedTileChanged;
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
-            GenerationConfig config, Sprite tileSprite, GraphicsLayers graphicsLayers)
+            GenerationConfig config, Sprite tileSprite, GraphicsLayers graphicsLayers, TurnManager turnManager)
         {
             _worldController = worldController;
             _camera = camera;
             _config = config;
             _highlightTilemap = graphicsLayers.HighlightTilemap;
+            _turnManager = turnManager;
+            _turnManager.OnTurnTrigger += UpdateCharacters;
+            
             _jobList = new();
+            _characters = new();
 
             _tile = ScriptableObject.CreateInstance<BaseTile>();
             _tile.sprite = tileSprite;
@@ -55,8 +62,21 @@ namespace PlayerControllers
             ConstructionTileTypeChange();
         }
 
+        private void UpdateCharacters()
+        {
+            foreach (var character in _characters)
+            {
+                character.Update();
+            }
+        }
+
         public void Tick()
         {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _turnManager.TogglePause();
+            }
+            
             _currentMousePosition = _camera.ScreenToWorldPoint(Input.mousePosition);
             _highlightTilemap.ClearAllTiles();
 
@@ -93,9 +113,22 @@ namespace PlayerControllers
                         HandleFloorPlacement();
                     }
                     break;
+                case BuildMode.Character:
+                    if (BuildingValidation() && Input.GetKeyDown(KeyCode.Mouse0))
+                    {
+                        HandleCharacterPlacement();
+                    }
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void HandleCharacterPlacement()
+        {
+            var character = new Pawn(_tileUnderMouse, 1, _jobList);
+            _worldController.CreateCharacter(_tileUnderMouse, character);
+            _characters.Add(character);
         }
 
         private bool FloorValidation()
@@ -104,7 +137,7 @@ namespace PlayerControllers
             
             if (_tileUnderMouse == null) return false;
             
-            if (_config.floorTileWorldToPlace == FloorTileType.None)
+            if (_config.floorTileToPlace == FloorTileType.None)
             {
                 var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
                 _highlightTilemap.SetTile(tilePos, _tile);
@@ -143,15 +176,22 @@ namespace PlayerControllers
 
         private void HandleFloorPlacement()
         {
-            if (_config.floorTileWorldToPlace == FloorTileType.None)
+            if (_config.floorTileToPlace == FloorTileType.None)
             {
                 _tileUnderMouse.Floor?.UninstallFloor();
                 return;
             }
+
+            var floor = new Floor(_tilesToPlaceBuilding, _config, _config.floorTileToPlace);
             
-            var job = new FloorJob(_tilesToPlaceBuilding, _config.floorTileWorldToPlace, _config.buildTime, _worldController);
+            var job = new FloorJob(floor, _config.buildTime, _worldController);
+            
+            foreach (var tile in _tilesToPlaceBuilding)
+            {
+                tile.InstallFloor(floor);
+            }
+            
             job.OnJobComplete += job1 => _jobList.Remove(job1);
-            _worldController.InstallFloor(job.Tiles[0], job.Floor);
             _jobList.Add(job);
         }
 
@@ -180,9 +220,16 @@ namespace PlayerControllers
                 return;
             }
             
-            var job = new BuildingJob(_tilesToPlaceBuilding, _config.buildingsTileToPlace, _config.buildTime, _worldController);
+            var building = new Building(_tilesToPlaceBuilding, _config, _config.buildingsTileToPlace);
+            
+            var job = new BuildingJob(building, _config.buildTime, _worldController);
+            
+            foreach (var tile in _tilesToPlaceBuilding)
+            {
+                tile.InstallBuilding(building);
+            }
+            
             job.OnJobComplete += job1 => _jobList.Remove(job1);
-            _worldController.InstallBuilding(job.Tiles, job.Building);
             _jobList.Add(job);
         }
 
@@ -340,16 +387,6 @@ namespace PlayerControllers
                     _highlightTilemap.SetColor(vector3Int, _highlightColor);
                 }
             }
-        }
-
-        public void FixedTick()
-        {
-            DoJobs();
-        }
-
-        public void FloorTileTypeChange()
-        {
-                
         }
     }
 }

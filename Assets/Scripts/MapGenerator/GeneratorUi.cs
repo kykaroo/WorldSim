@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Ai;
 using Data;
 using PlayerControllers;
 using TMPro;
@@ -40,23 +41,31 @@ namespace MapGenerator
         [SerializeField] private TextMeshProUGUI tileConstructionTypeText;
         [SerializeField] private TextMeshProUGUI tileFloorTypeText;
         [SerializeField] private TextMeshProUGUI tileWalkSpeedText;
+        [SerializeField] private TextMeshProUGUI turnCounterText;
+        [SerializeField] private TextMeshProUGUI characterText;
 
         private GenerationConfig _config;
         private MapInfoController _mapInfoController;
         private MouseController _mouseController;
+        private TurnManager _turnManager;
         private bool _isAutoUpdate;
         private Dictionary<DrawMode, int> _drawModeIds;
         private bool _paramHasChanged;
         private bool _mapInfoIsClear;
+        private int _turnCounter;
 
         [Inject]
-        public void Initialize(MapInfoController mapInfoController, GenerationConfig config, MouseController mouseController)
+        public void Initialize(MapInfoController mapInfoController, GenerationConfig config,
+            MouseController mouseController, TurnManager turnManager)
         {
             _config = config;
             _mapInfoController = mapInfoController;
             _mouseController = mouseController;
+            _turnManager = turnManager;
+            
             tileInfoPanel.SetActive(false);
             _mouseController.OnSelectedTileChanged += UpdateTileInfo;
+            _turnManager.OnTurnTrigger += RaiseTurnCounter;
 
             InitializeValues();
             
@@ -71,6 +80,12 @@ namespace MapGenerator
             
             GenerateMapPreview();
             GenerateMap();
+        }
+
+        private void RaiseTurnCounter()
+        {
+            _turnCounter += 1;
+            turnCounterText.text = $"Turn: {_turnCounter}";
         }
 
         private void UpdateTileInfo(Tile tile)
@@ -89,6 +104,7 @@ namespace MapGenerator
             tileConstructionTypeText.text = $"Tile building type: {(tile.Building == null ? "None" : tile.Building.Type)}";
             tileFloorTypeText.text = $"Tile floor type: {(tile.Floor == null ? "None" : tile.Floor.Type)}";
             tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
+            characterText.text = $"Character: {(tile.Pawn == null ? "None" : tile.Pawn)}";
         }
 
         private void InitializeValues()
@@ -123,7 +139,8 @@ namespace MapGenerator
             {
                 "World",
                 "Building",
-                "Floor"
+                "Floor",
+                "Character"
             };
             
             var constructionTileTypeList = new List<string>
@@ -199,14 +216,12 @@ namespace MapGenerator
 
         private void ChangeFloorTileType(int arg0)
         {
-            _config.floorTileWorldToPlace = arg0 switch
+            _config.floorTileToPlace = arg0 switch
             {
                 0 => FloorTileType.None,
                 1 => FloorTileType.Wood,
                 _ => throw new ArgumentOutOfRangeException()
             };
-            
-            _mouseController.FloorTileTypeChange();
         }
 
         private void ToggleInstantBuild(bool arg0)
@@ -221,6 +236,7 @@ namespace MapGenerator
                 0 => BuildMode.World,
                 1 => BuildMode.Building,
                 2 => BuildMode.Floor,
+                3 => BuildMode.Character,
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

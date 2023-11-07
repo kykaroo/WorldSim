@@ -10,8 +10,9 @@ namespace MapGenerator
         public BuildMode buildMode;
         public BuildingsTileType buildingsTileToPlace;
         public WorldTileType worldTileToPlace;
-        public FloorTileType floorTileWorldToPlace;
+        public FloorTileType floorTileToPlace;
         public DrawMode drawMode;
+        public Sprite characterSprite;
         public int tileSize;
 
         public int mapWidth;

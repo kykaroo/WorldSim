@@ -11,17 +11,24 @@ namespace Ai
         private float _jobTime;
         public float TotalJob { get; }
         public List<Tile> Tiles { get; }
-        public FloorTileType Floor { get; }
+        public bool IsTaskPerformed { get; set; }
+        public Floor Floor { get; }
         public float ConstructionProgress { get; set; }
         public event Action<IJob> OnJobComplete;
         public event Action<IJob> OnJobCancel;
         
-        public FloorJob(List<Tile> tiles, FloorTileType floor, float totalJob, WorldController worldController)
+        public FloorJob(Floor floor, float totalJob, WorldController worldController)
         {
-            Tiles = tiles;
-            TotalJob = totalJob;
             Floor = floor;
+            Tiles = Floor.Tiles;
+            TotalJob = totalJob;
             _worldController = worldController;
+            IsTaskPerformed = false;
+            
+            foreach (var tile in Tiles)
+            {
+                tile.PendingFloorJob = true;
+            }
         }
         
         public bool DoWork(float workTime)
@@ -33,12 +40,23 @@ namespace Ai
             if (!(_jobTime >= TotalJob)) return false;
 
             ConstructionProgress = 1;
+            
+            foreach (var tile in Tiles)
+            {
+                tile.PendingFloorJob = false;
+            }
+            
             OnJobComplete?.Invoke(this);
             return true;
         }
 
         public void CancelJob()
         {
+            foreach (var tile in Tiles)
+            {
+                tile.PendingFloorJob = false;
+            }
+            
             OnJobCancel?.Invoke(this);
         }
     }

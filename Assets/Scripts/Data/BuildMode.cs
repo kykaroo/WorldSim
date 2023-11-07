@@ -4,6 +4,7 @@
     {
         World,
         Building,
-        Floor
+        Floor,
+        Character
     }
 }

@@ -6,7 +6,7 @@ namespace Data
 {
     public class Building
     {
-        private readonly List<Tile> _tiles;
+        public readonly List<Tile> Tiles;
         public float WalkSpeedMultiplier;
         private BuildingsTileType _type;
         private int _width;
@@ -27,14 +27,14 @@ namespace Data
 
         public Building(IEnumerable<Tile> tiles, GenerationConfig config, BuildingsTileType type)
         {
-            _tiles = new(tiles);
+            Tiles = new(tiles);
             _config = config;
             Type = type;
         }
 
         public void UninstallBuilding()
         {
-            foreach (var tile in _tiles)
+            foreach (var tile in Tiles)
             {
                 tile.UninstallBuilding();
             }

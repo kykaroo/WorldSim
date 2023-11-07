@@ -14,13 +14,19 @@ namespace Data
     {
         private readonly WorldData _worldData;
         private readonly GenerationConfig _config;
+        private readonly TurnManager _turnManager;
+
+        private readonly List<Pawn> _characters;
 
 
         [Inject]
-        public WorldController(GenerationConfig config, WorldData worldData)
+        public WorldController(GenerationConfig config, WorldData worldData, TurnManager turnManager)
         {
             _config = config;
             _worldData = worldData;
+            _turnManager = turnManager;
+            _characters = new();
+            _turnManager.OnTurnTrigger += UpdateCharactersPosition;
         }
         
         public void CreateNewData()
@@ -57,6 +63,7 @@ namespace Data
             {
                 tile.OnTileTypeChanged -= TileChanged;
                 tile.OnBuildingTileTypeChanged -= BuildingTileChanged;
+                tile.OnFloorTileTypeChanged -= FloorTileChanged;
             }
 
             _worldData.WorldTilemap.ClearAllTiles(); 
@@ -86,6 +93,8 @@ namespace Data
             
             baseTile.sprite = tile.Floor == null ? null : _config.floorConfigs.First(config => config.type == tile.Floor.Type).sprite;
             _worldData.FloorTilemap.SetTile(tileChangeData, baseTile);
+            _worldData.FloorTilemap.SetTileFlags(tileChangeData, TileFlags.None);
+            _worldData.FloorTilemap.SetColor(tileChangeData, new(1, 1, 1, 0));
         }
 
         private void BuildingTileChanged(Tile tile)
@@ -94,9 +103,9 @@ namespace Data
             var tileChangeData = new Vector3Int(tile.X, tile.Y, 0);
             
             baseTile.sprite = tile.Building == null ? null : _config.buildingConfigs.First(config => config.type == tile.Building.Type).sprite;
-            _worldData.ConstructionTilemap.SetTile(tileChangeData, baseTile);
-            _worldData.ConstructionTilemap.SetTileFlags(tileChangeData, TileFlags.None);
-            _worldData.ConstructionTilemap.SetColor(tileChangeData, new(1, 1, 1, 0));
+            _worldData.BuildingsTilemap.SetTile(tileChangeData, baseTile);
+            _worldData.BuildingsTilemap.SetTileFlags(tileChangeData, TileFlags.None);
+            _worldData.BuildingsTilemap.SetColor(tileChangeData, new(1, 1, 1, 0));
         }
 
         public Tile GetTile(int x, int y)
@@ -105,42 +114,48 @@ namespace Data
             if (x < 0 || x >= _config.mapWidth) return null;
             if (y < 0 || y >= _config.mapHeight) return null;
 
-            return (Tile)_worldData.WorldTilemap.GetTile(new(x, y, 0));
+            return _worldData.Tiles[x, y];
         }
-        
-        public void InstallBuilding(List<Tile> tilesToPlaceBuilding, BuildingsTileType type)
-        {
-            Building building = new(tilesToPlaceBuilding, _config, type);
-            
-            foreach (var tile in tilesToPlaceBuilding)
-            {
-                tile.InstallBuilding(building);
-            }
-        }
-        
+
 
         public void UpdateBuildingConstructionProgress(BuildingJob buildingJob)
         {
             foreach (var tile in buildingJob.Tiles)
             {
-                _worldData.ConstructionTilemap.SetColor(new(tile.X, tile.Y, 0),
+                _worldData.BuildingsTilemap.SetColor(new(tile.X, tile.Y, 0),
                     new(1, 1, 1, buildingJob.ConstructionProgress));
             }
         }
 
-        public void InstallFloor(Tile tile, FloorTileType type)
+        public void UpdateFloorConstructionProgress(FloorJob floorJob)
         {
-            Floor floor = new(tile, _config, type);
-            
-            tile.InstallFloor(floor);
-        }
-        
-        public void UpdateFloorConstructionProgress(FloorJob buildingJob)
-        {
-            foreach (var tile in buildingJob.Tiles)
+            foreach (var tile in floorJob.Tiles)
             {
                 _worldData.FloorTilemap.SetColor(new(tile.X, tile.Y, 0), 
-                    new(1, 1, 1, buildingJob.ConstructionProgress));
+                    new(1, 1, 1, floorJob.ConstructionProgress));
+            }
+        }
+
+        public void CreateCharacter(Tile tile, Pawn pawn)
+        {
+            var baseTile = ScriptableObject.CreateInstance<BaseTile>();
+            var tileChangeData = new Vector3Int(tile.X, tile.Y, 0);
+            
+            _characters.Add(pawn);
+            baseTile.sprite = _config.characterSprite;
+            _worldData.CharacterTilemap.SetTile(tileChangeData, baseTile);
+        }
+
+        private void UpdateCharactersPosition()
+        {
+            _worldData.CharacterTilemap.ClearAllTiles();
+
+            foreach (var character in _characters)
+            {
+                var baseTile = ScriptableObject.CreateInstance<BaseTile>(); 
+                
+                baseTile.sprite = _config.characterSprite;
+                _worldData.CharacterTilemap.SetTile(new(character.CurrentTile.X, character.CurrentTile.Y, 0), baseTile);
             }
         }
     }

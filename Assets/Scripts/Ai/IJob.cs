@@ -8,6 +8,7 @@ namespace Ai
     {
         public float TotalJob { get; }
         public List<Tile> Tiles { get; }
+        public bool IsTaskPerformed { get; set; }
         public float ConstructionProgress { get; set; }
 
         public event Action<IJob> OnJobComplete;

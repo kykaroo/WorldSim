@@ -9,14 +9,17 @@ namespace Data
         public Tilemap HighlightTilemap { get; }
         public Tilemap ConstructionTilemap { get; }
         public Tilemap FloorTilemap{ get; }
+        public Tilemap CharacterTilemap{ get; }
 
         [Inject]
-        public GraphicsLayers(Tilemap worldTilemap, Tilemap highlightTilemap, Tilemap constructionTilemap, Tilemap floorTilemap)
+        public GraphicsLayers(Tilemap worldTilemap, Tilemap highlightTilemap, Tilemap constructionTilemap,
+            Tilemap floorTilemap, Tilemap characterTilemap)
         {
             WorldTilemap = worldTilemap;
             HighlightTilemap = highlightTilemap;
             ConstructionTilemap = constructionTilemap;
             FloorTilemap = floorTilemap;
+            CharacterTilemap = characterTilemap;
         }
     }
 }
