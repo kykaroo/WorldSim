@@ -103,8 +103,7 @@ namespace MapGenerator
             tileWorldTypeText.text = $"Tile world type: {tile.Type}";
             tileConstructionTypeText.text = $"Tile building type: {(tile.Building == null ? "None" : tile.Building.Type)}";
             tileFloorTypeText.text = $"Tile floor type: {(tile.Floor == null ? "None" : tile.Floor.Type)}";
-            tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.WalkSpeedMultiplier}";
-            characterText.text = $"Character: {(tile.Pawn == null ? "None" : tile.Pawn)}";
+            tileWalkSpeedText.text = $"Tile walk speed multiplier: {tile.MoveSpeedMultiplier}";
         }
 
         private void InitializeValues()

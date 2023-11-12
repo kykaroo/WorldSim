@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Data;
 using MapGenerator;
+using Pathfinding;
+using UnityEngine;
 
 namespace Ai
 {
@@ -13,27 +17,33 @@ namespace Ai
         private readonly List<IJob> _jobs;
         
         private Tile _currentTile;
+        private Tile _nextTileToMove;
         private Tile _destinationTile;
         private IJob _currentJob;
+        private readonly Pathfinder _pathfinder;
+        private Queue<Tile> _path;
+        private readonly WorldController _worldController;
+        private readonly List<Tile> _doWorkTiles;
+        private bool _isMoving;
 
         public Tile CurrentTile => _currentTile;
-
-        public Tile DestinationTile => _destinationTile;
         
-        
+        public event Action<Queue<Tile>, Tile> OnPathUpdate;
 
-        public Pawn(Tile tile, float baseSpeed, List<IJob> jobs)
+        public Pawn(Tile tile, float baseSpeed, List<IJob> jobs, Pathfinder pathfinder, WorldController worldController)
         {
             _currentTile = tile;
-            _currentTile.Pawn = this;
             _baseSpeed = baseSpeed;
             _jobs = jobs;
+            _pathfinder = pathfinder;
+            _worldController = worldController;
+            _path = new();
+            _doWorkTiles = new();
         }
 
         public void SetDestination(Tile tile)
         {
-            if (tile.WalkSpeedMultiplier == 0) throw new ArgumentException();
-            if (tile.Pawn != null) return;
+            if (tile.MoveSpeedMultiplier == 0) throw new ArgumentException();
 
             _destinationTile = tile;
         }
@@ -48,15 +58,32 @@ namespace Ai
                     job.IsTaskPerformed = true;
                     _currentJob = job;
                     _currentJob.OnJobComplete += JobDone;
-                    _destinationTile = job.Tiles[0];
+                    SetDestination(job.Tiles[0]);
+                    _path = _pathfinder.FindPath(_currentTile, _destinationTile);
+                    OnPathUpdate?.Invoke(_path, _nextTileToMove);
+                    _doWorkTiles.Clear();
+                    
+                    foreach (var tile in _worldController.GetTileNeighbours(_currentJob.Tiles[0]).Values)
+                    {
+                        _doWorkTiles.Add(tile);
+                    }
                     break;
                 }
             }
             else
             {
-                if (_currentTile == _currentJob.Tiles[0])
+                if (_doWorkTiles.Any(tile => tile == _currentTile))
                 {
                     _currentJob.DoWork(1);
+                }
+                else
+                {
+                    if (_nextTileToMove == null)
+                    {
+                        _jobs.First(job => job == _currentJob).CancelJob();
+                        _currentJob = null;
+                        Debug.Log("Не удалось найти путь к заданию");
+                    }
                 }
             }
 
@@ -71,28 +98,37 @@ namespace Ai
 
         private void Move()
         {
-            if (_destinationTile == null)
+            if (_currentTile == _destinationTile)
             {
                 _movementPercentage = 0;
                 return;
             }
 
-            _speed = _baseSpeed * _destinationTile.WalkSpeedMultiplier;
+            DoMove();
 
-            if (_destinationTile != null)
+            if (!_isMoving && _path.TryDequeue(out _nextTileToMove))
             {
-                _movementPercentage += _speed;
+                OnPathUpdate?.Invoke(_path, _nextTileToMove);
             }
+        }
+
+        private void DoMove()
+        {
+            if (_nextTileToMove == null) return;
+            
+            _speed = _baseSpeed * _nextTileToMove.MoveSpeedMultiplier;
+            _movementPercentage += _speed;
 
             if (_movementPercentage >= 1)
             {
-                if (_destinationTile.Pawn != null) return;
-
                 _movementPercentage -= 1;
-                _currentTile.Pawn = null;
-                _currentTile = _destinationTile;
-                _currentTile.Pawn = this;
+                _currentTile = _nextTileToMove;
+                _nextTileToMove = null;
+                _isMoving = false;
+                return;
             }
+
+            _isMoving = true;
         }
     }
 }

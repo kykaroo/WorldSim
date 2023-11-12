@@ -2,6 +2,7 @@
 using System.Linq;
 using Data;
 using MapGenerator;
+using Pathfinding;
 using Zenject;
 using Tile = MapGenerator.Tile;
 
@@ -14,6 +15,7 @@ namespace Ai
         private readonly WorldController _worldController;
         private readonly List<Tile> _tilesToPlaceBuilding;
         private readonly TurnManager _turnManager;
+        private readonly Pathfinder _pathfinder;
         
         private const int XCord = 50;
         private const int YCord = 50;
@@ -102,7 +104,7 @@ namespace Ai
 
         public void CreatePop()
         {
-            var character = new Pawn(_worldController.GetTile(50, 50), 1, _jobList);
+            var character = new Pawn(_worldController.GetTile(50, 50), 1, _jobList, _pathfinder, _worldController);
             _characters.Add(character);
         }
 

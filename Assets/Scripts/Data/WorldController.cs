@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ai;
 using MapGenerator;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Zenject;
@@ -12,11 +13,15 @@ namespace Data
 {
     public class WorldController
     {
+        public TileGraph TileGraph { get; private set; }
+        
         private readonly WorldData _worldData;
         private readonly GenerationConfig _config;
         private readonly TurnManager _turnManager;
 
         private readonly List<Pawn> _characters;
+
+        public event Action OnMapGenerated;
 
 
         [Inject]
@@ -26,7 +31,7 @@ namespace Data
             _worldData = worldData;
             _turnManager = turnManager;
             _characters = new();
-            _turnManager.OnTurnTrigger += UpdateCharactersPosition;
+            _turnManager.OnLateTurnTrigger += UpdateCharactersPosition;
         }
         
         public void CreateNewData()
@@ -157,6 +162,33 @@ namespace Data
                 baseTile.sprite = _config.characterSprite;
                 _worldData.CharacterTilemap.SetTile(new(character.CurrentTile.X, character.CurrentTile.Y, 0), baseTile);
             }
+        }
+
+        public WorldData GetWorldData()
+        {
+            return _worldData;
+        }
+
+        public Dictionary<CardinalDirections, Tile> GetTileNeighbours(Tile tile)
+        {
+            var dict = new Dictionary<CardinalDirections, Tile>
+            {
+                { CardinalDirections.North, GetTile(tile.X, tile.Y + 1) },
+                { CardinalDirections.Northeast, GetTile(tile.X + 1, tile.Y + 1) },
+                { CardinalDirections.East, GetTile(tile.X + 1, tile.Y) },
+                { CardinalDirections.Southeast, GetTile(tile.X + 1, tile.Y - 1) },
+                { CardinalDirections.South, GetTile(tile.X, tile.Y - 1) },
+                { CardinalDirections.Southwest, GetTile(tile.X - 1, tile.Y - 1) },
+                { CardinalDirections.West, GetTile(tile.X - 1, tile.Y) },
+                { CardinalDirections.Northwest, GetTile(tile.X - 1, tile.Y + 1) }
+            };
+
+            return dict;
+        }
+
+        public void InitializePathfinder()
+        {
+            OnMapGenerated?.Invoke();
         }
     }
 }

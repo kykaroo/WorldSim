@@ -49,6 +49,7 @@ namespace MapGenerator
                 await Task.Yield();
             }
             
+            _worldController.InitializePathfinder();
             OnMapGenerationComplete?.Invoke();
         }
     }

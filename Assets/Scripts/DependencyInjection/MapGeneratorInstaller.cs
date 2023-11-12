@@ -1,6 +1,7 @@
 ﻿using Ai;
 using Data;
 using MapGenerator;
+using Pathfinding;
 using PlayerControllers;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -19,6 +20,7 @@ namespace DependencyInjection
         [SerializeField] private Tilemap constructionTilemap;
         [SerializeField] private Tilemap highlightTilemap;
         [SerializeField] private Tilemap characterTilemap;
+        [SerializeField] private Tilemap pathTilemap;
         [SerializeField] private Sprite tileSprite;
         public override void InstallBindings()
         {
@@ -32,8 +34,10 @@ namespace DependencyInjection
             Container.BindInterfacesAndSelfTo<CameraController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<WorldController>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<MouseController>().AsSingle().WithArguments(tileSprite).NonLazy();
-            Container.BindInterfacesAndSelfTo<GraphicsLayers>().AsSingle().WithArguments(worldTilemap, highlightTilemap, constructionTilemap, floorTilemap, characterTilemap).NonLazy();
+            Container.BindInterfacesAndSelfTo<GraphicsLayers>().AsSingle().WithArguments(worldTilemap, highlightTilemap,
+                constructionTilemap, floorTilemap, characterTilemap, pathTilemap).NonLazy();
             Container.BindInterfacesAndSelfTo<TurnManager>().AsSingle().NonLazy();
+            Container.BindInterfacesAndSelfTo<Pathfinder>().AsSingle().NonLazy();
 
             Container.BindInterfacesAndSelfTo<GenerationConfig>().FromNewScriptableObject(generationConfig).AsSingle();
             Container.BindInterfacesAndSelfTo<GeneratorUi>().FromInstance(generatorUi).AsSingle();

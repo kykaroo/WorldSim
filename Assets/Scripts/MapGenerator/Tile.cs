@@ -26,7 +26,7 @@ namespace MapGenerator
             }
         }
 
-        public float WalkSpeedMultiplier { get; private set; }
+        public float MoveSpeedMultiplier { get; private set; }
         
         public bool BuildingValid { get; private set; }
         public bool PendingBuildingJob { get; set; }
@@ -34,7 +34,6 @@ namespace MapGenerator
         public bool BuildingComplete { get; set; }
         public bool FloorValid { get; set; }
         public Floor Floor { get; set; }
-        public Pawn Pawn { get; set; }
         public TileInventory TileInventory { get; private set; }
 
         public Building Building { get; private set; }
@@ -71,13 +70,13 @@ namespace MapGenerator
         {
             if (Building != null && BuildingComplete)
             {
-                WalkSpeedMultiplier = _tileWalkSpeedMultiplier * Building.WalkSpeedMultiplier;
+                MoveSpeedMultiplier = _tileWalkSpeedMultiplier * Building.WalkSpeedMultiplier;
                 return;
             }
 
-            WalkSpeedMultiplier = Floor?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
+            MoveSpeedMultiplier = Floor?.WalkSpeedMultiplier ?? _tileWalkSpeedMultiplier;
 
-            BuildingValid = WalkSpeedMultiplier != 0 && Building == null;
+            BuildingValid = MoveSpeedMultiplier != 0 && Building == null;
             FloorValid = _tileWalkSpeedMultiplier != 0 && Floor == null;
         }
         
@@ -107,8 +106,9 @@ namespace MapGenerator
 
         public bool IsNeighbour(Tile tile)
         {
-            if (tile.X >= X + 1 || tile.X >= X - 1) return false;
-            return tile.Y < Y + 1 && tile.Y < Y - 1;
+            var diff = MathF.Abs(X - tile.X) + MathF.Abs(Y - tile.Y);
+
+            return (int)diff == 1 || ((int)MathF.Abs(X - tile.X) == 1 && (int)MathF.Abs(Y - tile.Y) == 1);
         }
     }
 }

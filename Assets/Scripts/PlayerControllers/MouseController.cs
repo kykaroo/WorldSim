@@ -4,6 +4,7 @@ using System.Linq;
 using Ai;
 using Data;
 using MapGenerator;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
@@ -18,6 +19,7 @@ namespace PlayerControllers
         private readonly Camera _camera;
         private readonly GenerationConfig _config;
         private readonly Tilemap _highlightTilemap;
+        private readonly Tilemap _pathTilemap;
         private readonly List<Tile> _tilesToPlaceBuilding;
         private readonly List<IJob> _jobList;
         private readonly List<Pawn> _characters;
@@ -37,6 +39,7 @@ namespace PlayerControllers
         private Tile _selectedTile;
         private int _width;
         private int _height;
+        private readonly Pathfinder _pathfinder;
 
         public bool IsInstantBuild;
         
@@ -44,13 +47,16 @@ namespace PlayerControllers
 
         [Inject]
         public MouseController(WorldController worldController, Camera camera,
-            GenerationConfig config, Sprite tileSprite, GraphicsLayers graphicsLayers, TurnManager turnManager)
+            GenerationConfig config, Sprite tileSprite, GraphicsLayers graphicsLayers, TurnManager turnManager,
+            Pathfinder pathfinder)
         {
             _worldController = worldController;
             _camera = camera;
             _config = config;
             _highlightTilemap = graphicsLayers.HighlightTilemap;
+            _pathTilemap = graphicsLayers.PathTilemap;
             _turnManager = turnManager;
+            _pathfinder = pathfinder;
             _turnManager.OnTurnTrigger += UpdateCharacters;
             
             _jobList = new();
@@ -126,8 +132,9 @@ namespace PlayerControllers
 
         private void HandleCharacterPlacement()
         {
-            var character = new Pawn(_tileUnderMouse, 1, _jobList);
+            var character = new Pawn(_tileUnderMouse, 1, _jobList, _pathfinder, _worldController);
             _worldController.CreateCharacter(_tileUnderMouse, character);
+            character.OnPathUpdate += HighlightPath;
             _characters.Add(character);
         }
 
@@ -139,10 +146,7 @@ namespace PlayerControllers
             
             if (_config.floorTileToPlace == FloorTileType.None)
             {
-                var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
-                _highlightTilemap.SetTile(tilePos, _tile);
-                _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                _highlightTilemap.SetColor(tilePos, _invalidColor);
+                HighlightTile(_tileUnderMouse, _invalidColor);
                 return true;
             }
             
@@ -154,20 +158,14 @@ namespace PlayerControllers
 
                     if (tile == null) return false;
                     if (_config.drawMode == DrawMode.NoiseMap) return false;
-                    
-                    var tilePos = new Vector3Int(tile.X, tile.Y, 0);
 
                     if (tile.FloorValid)
                     {
-                        _highlightTilemap.SetTile(tilePos, _tile);
-                        _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                        _highlightTilemap.SetColor(tilePos, _validColor);
+                        HighlightTile(tile, _validColor);
                         _tilesToPlaceBuilding.Add(tile);
                         continue;
                     }
-                    _highlightTilemap.SetTile(tilePos, _tile);
-                    _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                    _highlightTilemap.SetColor(tilePos, _invalidColor);
+                    HighlightTile(tile, _invalidColor);
                 }
             }
 
@@ -248,10 +246,7 @@ namespace PlayerControllers
             
             if (_config.buildingsTileToPlace == BuildingsTileType.None)
             {
-                var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
-                _highlightTilemap.SetTile(tilePos, _tile);
-                _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                _highlightTilemap.SetColor(tilePos, _invalidColor);
+                HighlightTile(_tileUnderMouse, _invalidColor);
                 return true;
             }
             
@@ -263,20 +258,14 @@ namespace PlayerControllers
 
                     if (tile == null) return false;
                     if (_config.drawMode == DrawMode.NoiseMap) return false;
-                    
-                    var tilePos = new Vector3Int(tile.X, tile.Y, 0);
 
                     if (tile.BuildingValid)
                     {
-                        _highlightTilemap.SetTile(tilePos, _tile);
-                        _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                        _highlightTilemap.SetColor(tilePos, _validColor);
+                        HighlightTile(tile, _validColor);
                         _tilesToPlaceBuilding.Add(tile);
                         continue;
                     }
-                    _highlightTilemap.SetTile(tilePos, _tile);
-                    _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-                    _highlightTilemap.SetColor(tilePos, _invalidColor);
+                    HighlightTile(tile, _invalidColor);
                 }
             }
 
@@ -292,19 +281,13 @@ namespace PlayerControllers
 
             if (_tileUnderMouse == null) return;
             
-            var tilePos = new Vector3Int(_tileUnderMouse.X, _tileUnderMouse.Y, 0);
-            _highlightTilemap.SetTile(tilePos, _tile);
-            _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
-            _highlightTilemap.SetColor(tilePos, _highlightColor);
+            HighlightTile(_tileUnderMouse, _highlightColor);
         }
 
         private void HighlightSelectedTile()
         {
             if (_selectedTile == null) return;
-            var selectedTilePos = new Vector3Int(_selectedTile.X, _selectedTile.Y, 0);
-            _highlightTilemap.SetTile(selectedTilePos, _tile);
-            _highlightTilemap.SetTileFlags(selectedTilePos, TileFlags.None);
-            _highlightTilemap.SetColor(selectedTilePos, _highlightColor);
+            HighlightTile(_selectedTile, _highlightColor);
             OnSelectedTileChanged?.Invoke(_selectedTile);
         }
 
@@ -377,16 +360,44 @@ namespace PlayerControllers
             {
                 for (var y = startY; y <= endY; y++)
                 {
-                    var t = _worldController.GetTile(x, y);
+                    var tile = _worldController.GetTile(x, y);
 
-                    if (t == null) continue;
+                    if (tile == null) continue;
 
-                    var vector3Int = new Vector3Int(x, y, 0);
-                    _highlightTilemap.SetTile(vector3Int, _tile);
-                    _highlightTilemap.SetTileFlags(vector3Int, TileFlags.None);
-                    _highlightTilemap.SetColor(vector3Int, _highlightColor);
+                    HighlightTile(tile, _highlightColor);
                 }
             }
+        }
+
+        private void HighlightPath(Queue<Tile> path, Tile next)
+        {
+            var tilesToHighlight = new Queue<Tile>(path);
+            _pathTilemap.ClearAllTiles();
+
+            if (next != null)
+            {
+                var pos = new Vector3Int(next.X, next.Y, 0);
+                _pathTilemap.SetTile(pos, _tile);
+                _pathTilemap.SetTileFlags(pos, TileFlags.None);
+                _pathTilemap.SetColor(pos, _validColor);
+            }
+
+            while (tilesToHighlight.Count > 0)
+            {
+                var nextTile = tilesToHighlight.Dequeue();
+                var tilePos = new Vector3Int(nextTile.X, nextTile.Y, 0);
+                _pathTilemap.SetTile(tilePos, _tile);
+                _pathTilemap.SetTileFlags(tilePos, TileFlags.None);
+                _pathTilemap.SetColor(tilePos, _invalidColor);
+            }
+        }
+
+        private void HighlightTile(Tile tile, Color color)
+        {
+            var tilePos = new Vector3Int(tile.X, tile.Y, 0);
+            _highlightTilemap.SetTile(tilePos, _tile);
+            _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
+            _highlightTilemap.SetColor(tilePos, color);
         }
     }
 }

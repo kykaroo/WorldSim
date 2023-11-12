@@ -12,6 +12,7 @@ namespace Ai
         private bool _onPause;
 
         public event Action OnTurnTrigger; 
+        public event Action OnLateTurnTrigger; 
 
         [Inject]
         public TurnManager()
@@ -30,6 +31,7 @@ namespace Ai
             
             _timer = BaseTimeBetweenTurns;
             OnTurnTrigger?.Invoke();
+            OnLateTurnTrigger?.Invoke();
         }
 
         public void ChangeGameSpeed(float speedMultiplier)
