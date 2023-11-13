@@ -29,7 +29,7 @@ namespace Ai
 
         public Tile CurrentTile => _currentTile;
         
-        public event Action<Queue<Tile>, Tile> OnPathUpdate;
+        public event Action<Pawn, Queue<Tile>, Tile> OnPathUpdate;
 
         public Pawn(Tile tile, float baseSpeed, List<IJob> jobs, Pathfinder pathfinder, WorldController worldController)
         {
@@ -68,7 +68,7 @@ namespace Ai
                     _currentJob.OnJobComplete += JobDone;
                     SetDestination(job.Tiles[0]);
                     _path = _pathfinder.FindPath(_currentTile, _destinationTile);
-                    OnPathUpdate?.Invoke(_path, _nextTileToMove);
+                    OnPathUpdate?.Invoke(this, _path, _nextTileToMove);
                     _doWorkTiles.Clear();
                     
                     foreach (var tile in _worldController.GetTileNeighbours(_currentJob.Tiles[0]).Values)
@@ -114,19 +114,24 @@ namespace Ai
 
             DoMove();
 
-            if (!_isMoving && _path.TryDequeue(out _nextTileToMove))
+            if (!_isMoving)
             {
-                OnPathUpdate?.Invoke(_path, _nextTileToMove);
+                _path.TryDequeue(out _nextTileToMove);
             }
+
+            OnPathUpdate?.Invoke(this, _path, _nextTileToMove);
         }
 
         private void DoMove()
         {
-            if (_nextTileToMove == null) return;
+            if (_nextTileToMove == null)
+            {
+                return;
+            }
             if (_nextTileToMove.MoveSpeedMultiplier == 0) // Попробовать заменить на событие изменения тайла для перестройки пути
             {
                 _path = _pathfinder.FindPath(_currentTile, _destinationTile);
-                _nextTileToMove = _path.Dequeue();
+                _path.TryDequeue(out _nextTileToMove);
             }
 
             _speed = _baseSpeed * _nextTileToMove.MoveSpeedMultiplier;

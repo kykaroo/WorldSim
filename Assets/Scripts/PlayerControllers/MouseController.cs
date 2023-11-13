@@ -40,6 +40,8 @@ namespace PlayerControllers
         private int _width;
         private int _height;
         private readonly Pathfinder _pathfinder;
+        private readonly Dictionary<Pawn, Tile> _nextTiles;
+        private readonly Dictionary<Pawn, List<Tile>> _paths;
 
         public bool IsInstantBuild;
         
@@ -57,11 +59,13 @@ namespace PlayerControllers
             _pathTilemap = graphicsLayers.PathTilemap;
             _turnManager = turnManager;
             _pathfinder = pathfinder;
-            _turnManager.OnEarlyTurnTrigger += () => _pathTilemap.ClearAllTiles();
+            _turnManager.OnLateTurnTrigger += ApplyPathHighlight;
             _turnManager.OnTurnTrigger += UpdateCharacters;
             
             _jobList = new();
             _characters = new();
+            _paths = new();
+            _nextTiles = new();
 
             _tile = ScriptableObject.CreateInstance<BaseTile>();
             _tile.sprite = tileSprite;
@@ -370,27 +374,15 @@ namespace PlayerControllers
             }
         }
 
-        private void HighlightPath(Queue<Tile> path, Tile next)
+        private void HighlightPath(Pawn pawn, Queue<Tile> path, Tile next)
         {
-            var tilesToHighlight = new Queue<Tile>(path);
-            
-
-            if (next != null)
+            _paths.Remove(pawn);
+            if (path != null)
             {
-                var pos = new Vector3Int(next.X, next.Y, 0);
-                _pathTilemap.SetTile(pos, _tile);
-                _pathTilemap.SetTileFlags(pos, TileFlags.None);
-                _pathTilemap.SetColor(pos, _validColor);
+                _paths.Add(pawn, new(path));
             }
-
-            while (tilesToHighlight.Count > 0)
-            {
-                var nextTile = tilesToHighlight.Dequeue();
-                var tilePos = new Vector3Int(nextTile.X, nextTile.Y, 0);
-                _pathTilemap.SetTile(tilePos, _tile);
-                _pathTilemap.SetTileFlags(tilePos, TileFlags.None);
-                _pathTilemap.SetColor(tilePos, _invalidColor);
-            }
+            _nextTiles.Remove(pawn);
+            _nextTiles?.Add(pawn, next);
         }
 
         private void HighlightTile(Tile tile, Color color)
@@ -399,6 +391,38 @@ namespace PlayerControllers
             _highlightTilemap.SetTile(tilePos, _tile);
             _highlightTilemap.SetTileFlags(tilePos, TileFlags.None);
             _highlightTilemap.SetColor(tilePos, color);
+        }
+
+        private void ApplyPathHighlight()
+        {
+            _pathTilemap.ClearAllTiles();
+            var paths = new List<Tile>();
+
+            foreach (var tilesList in _paths.Values)
+            {
+                paths.AddRange(tilesList);
+            }
+            
+            var nextTileList = new List<Tile>(_nextTiles.Values);
+            
+            for (var i = 0; i < _paths.Count; i++)
+            {
+                foreach (var tile in paths)
+                {
+                    var tilePos = new Vector3Int(tile.X, tile.Y, 0);
+                    _pathTilemap.SetTile(tilePos, _tile);
+                    _pathTilemap.SetTileFlags(tilePos, TileFlags.None);
+                    _pathTilemap.SetColor(tilePos, _invalidColor);
+                }
+                
+                if (nextTileList[i] != null)
+                {
+                    var pos = new Vector3Int(nextTileList[i].X, nextTileList[i].Y, 0);
+                    _pathTilemap.SetTile(pos, _tile);
+                    _pathTilemap.SetTileFlags(pos, TileFlags.None);
+                    _pathTilemap.SetColor(pos, _validColor);
+                }
+            }
         }
     }
 }

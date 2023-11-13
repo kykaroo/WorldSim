@@ -42,7 +42,6 @@ namespace MapGenerator
         [SerializeField] private TextMeshProUGUI tileFloorTypeText;
         [SerializeField] private TextMeshProUGUI tileWalkSpeedText;
         [SerializeField] private TextMeshProUGUI turnCounterText;
-        [SerializeField] private TextMeshProUGUI characterText;
 
         private GenerationConfig _config;
         private MapInfoController _mapInfoController;
