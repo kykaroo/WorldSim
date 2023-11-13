@@ -11,6 +11,7 @@ namespace Ai
         private const float BaseTimeBetweenTurns = 1;
         private bool _onPause;
 
+        public event Action OnEarlyTurnTrigger; 
         public event Action OnTurnTrigger; 
         public event Action OnLateTurnTrigger; 
 
@@ -29,7 +30,8 @@ namespace Ai
 
             if (_timer >= 0) return;
             
-            _timer = BaseTimeBetweenTurns;
+            _timer = BaseTimeBetweenTurns; 
+            OnEarlyTurnTrigger?.Invoke();
             OnTurnTrigger?.Invoke();
             OnLateTurnTrigger?.Invoke();
         }

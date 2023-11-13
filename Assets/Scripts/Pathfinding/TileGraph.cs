@@ -46,5 +46,10 @@ namespace Pathfinding
             
             Debug.Log($"Created {Nodes.Count}");
         }
+
+        public void ChangeNode()
+        {
+            
+        }
     }
 }

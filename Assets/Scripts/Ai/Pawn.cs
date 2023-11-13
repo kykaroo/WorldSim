@@ -5,6 +5,7 @@ using Data;
 using MapGenerator;
 using Pathfinding;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Ai
 {
@@ -44,6 +45,13 @@ namespace Ai
         public void SetDestination(Tile tile)
         {
             if (tile.MoveSpeedMultiplier == 0) throw new ArgumentException();
+
+            if (_currentJob.Tiles.Any(tile => tile == _currentTile))
+            {
+                var tiles = _worldController.GetTileNeighbours(_currentTile).Values.ToArray();
+                _destinationTile = tiles[Random.Range(0, tiles.Length)];
+                return;
+            } //Todo Изменить решение ошибки, при размещении таила прямо на пешке
 
             _destinationTile = tile;
         }
@@ -115,7 +123,7 @@ namespace Ai
         private void DoMove()
         {
             if (_nextTileToMove == null) return;
-            if (_nextTileToMove.MoveSpeedMultiplier == 0)
+            if (_nextTileToMove.MoveSpeedMultiplier == 0) // Попробовать заменить на событие изменения тайла для перестройки пути
             {
                 _path = _pathfinder.FindPath(_currentTile, _destinationTile);
                 _nextTileToMove = _path.Dequeue();

@@ -57,6 +57,7 @@ namespace PlayerControllers
             _pathTilemap = graphicsLayers.PathTilemap;
             _turnManager = turnManager;
             _pathfinder = pathfinder;
+            _turnManager.OnEarlyTurnTrigger += () => _pathTilemap.ClearAllTiles();
             _turnManager.OnTurnTrigger += UpdateCharacters;
             
             _jobList = new();
@@ -372,7 +373,7 @@ namespace PlayerControllers
         private void HighlightPath(Queue<Tile> path, Tile next)
         {
             var tilesToHighlight = new Queue<Tile>(path);
-            _pathTilemap.ClearAllTiles();
+            
 
             if (next != null)
             {
