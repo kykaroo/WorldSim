@@ -38,13 +38,34 @@ namespace Pathfinding
                 {
                     if (neighbourTile == null) continue;
                     if (neighbourTile.MoveSpeedMultiplier == 0) continue;
-                    
+                    if (IsClippingCorner(tile, neighbourTile)) continue;
+
                     var edge = new Edge(Nodes[neighbourTile], neighbourTile.MoveSpeedMultiplier);
                     node.Edges.Add(edge);
                 }
             }
             
             Debug.Log($"Created {Nodes.Count}");
+        }
+
+        private bool IsClippingCorner(Tile tile, Tile neighbourTile)
+        {
+            var x = tile.X - neighbourTile.X;
+            var y = tile.Y - neighbourTile.Y;
+            
+            if (Mathf.Abs(x) + Mathf.Abs(y) != 2) return false;
+
+            if (_worldController.GetTile(tile.X - x, tile.Y).MoveSpeedMultiplier == 0)
+            {
+                return true;
+            }
+            
+            if (_worldController.GetTile(tile.X, tile.Y - y).MoveSpeedMultiplier == 0)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public void ChangeNode()
