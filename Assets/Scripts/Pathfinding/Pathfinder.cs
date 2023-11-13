@@ -33,7 +33,6 @@ namespace Pathfinding
                 throw new ArgumentException(nameof(tileStart), $"Ноды тайла {tileEnd} не существует");
             }
             
-            var closedSet = new List<Node>();
             var openSet = new SimplePriorityQueue<Node>();
             var startNode = _tileGraph.Nodes[tileStart];
             var endNode = _tileGraph.Nodes[tileEnd];
@@ -67,17 +66,12 @@ namespace Pathfinding
                 {
                     return ReconstructMap(cameFrom, current);
                 }
-                
-                closedSet.Add(current);
 
                 foreach (var neighbour in current.Edges)
                 {
-                    if (closedSet.Contains(neighbour.Node)) continue;
-                    
-
                     var tentativeGScore = gScore[current] + DistanceBetween(current, neighbour.Node) / neighbour.Node.Tile.MoveSpeedMultiplier;
 
-                    if (closedSet.Contains(neighbour.Node) && tentativeGScore >= gScore[neighbour.Node]) continue;
+                    if (tentativeGScore >= gScore[neighbour.Node]) continue;
 
                     cameFrom[neighbour.Node] = current;
                     gScore[neighbour.Node] = tentativeGScore;
@@ -90,6 +84,7 @@ namespace Pathfinding
                 }
             }
 
+            Debug.Log("Путь не найден");
             return null;
         }
 
@@ -108,7 +103,7 @@ namespace Pathfinding
             var path = new Queue<Tile>(reverse);
             path.Dequeue(); //Исключая стартовый таил
 
-            return new(path);
+            return path;
         }
 
         float DistanceBetween(Node start, Node end)

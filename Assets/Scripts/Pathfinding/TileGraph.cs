@@ -24,8 +24,6 @@ namespace Pathfinding
                 {
                     var tile = _worldController.GetTile(x, y);
 
-                    if (!(tile.MoveSpeedMultiplier > 0)) continue;
-                    
                     var node = new Node(tile);
                     Nodes.Add(tile, node);
                 }
@@ -38,8 +36,8 @@ namespace Pathfinding
 
                 foreach (var neighbourTile in neighbours.Values)
                 {
-                    if (neighbourTile == null)continue;
-                    if (!(neighbourTile.MoveSpeedMultiplier > 0)) continue;
+                    if (neighbourTile == null) continue;
+                    if (neighbourTile.MoveSpeedMultiplier == 0) continue;
                     
                     var edge = new Edge(Nodes[neighbourTile], neighbourTile.MoveSpeedMultiplier);
                     node.Edges.Add(edge);

@@ -82,7 +82,7 @@ namespace Ai
                     {
                         _jobs.First(job => job == _currentJob).CancelJob();
                         _currentJob = null;
-                        Debug.Log("Не удалось найти путь к заданию");
+                        Debug.Log("Путь был найден, но персонаж не смог дойти до цели");
                     }
                 }
             }
@@ -115,7 +115,12 @@ namespace Ai
         private void DoMove()
         {
             if (_nextTileToMove == null) return;
-            
+            if (_nextTileToMove.MoveSpeedMultiplier == 0)
+            {
+                _path = _pathfinder.FindPath(_currentTile, _destinationTile);
+                _nextTileToMove = _path.Dequeue();
+            }
+
             _speed = _baseSpeed * _nextTileToMove.MoveSpeedMultiplier;
             _movementPercentage += _speed;
 
